@@ -28,6 +28,7 @@ class HotkeyManagerApp:
         self.config = load_config()
         self.result: AnalysisResult | None = None
         self.checker = WindowsConflictChecker()
+        self._collapsed_categories: set[str] = set()
 
         self._setup_ui()
 
@@ -93,7 +94,10 @@ class HotkeyManagerApp:
         self._tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
+        self._tree.bind("<Double-1>", self._on_tree_click)
+
         self._tree.tag_configure("category_header", background="#4472C4", foreground="white", font=("Arial", 10, "bold"))
+        self._tree.tag_configure("category_collapsed", background="#5B9BD5", foreground="white", font=("Arial", 10, "bold"))
         self._tree.tag_configure("assigned", background="#C6EFCE")
         self._tree.tag_configure("needs_assignment", background="#FFEB9C")
         self._tree.tag_configure("duplicate", background="#FFC7CE")
@@ -153,6 +157,22 @@ class HotkeyManagerApp:
         self._update_tree()
         self._status_label.config(text="AI генерация завершена")
 
+    def _on_tree_click(self, event):
+        item = self._tree.selection()
+        if not item:
+            return
+
+        values = self._tree.item(item[0], "values")
+        tags = self._tree.item(item[0], "tags")
+
+        if "category_header" in tags or "category_collapsed" in tags:
+            cat_name = values[0].replace("📁 ", "").replace("▸ ", "")
+            if cat_name in self._collapsed_categories:
+                self._collapsed_categories.discard(cat_name)
+            else:
+                self._collapsed_categories.add(cat_name)
+            self._update_tree()
+
     def _update_tree(self):
         for item in self._tree.get_children():
             self._tree.delete(item)
@@ -167,31 +187,36 @@ class HotkeyManagerApp:
             categories[cmd.category].append(cmd)
 
         for cat_name, cmds in categories.items():
+            is_collapsed = cat_name in self._collapsed_categories
+            icon = "▸" if is_collapsed else "📁"
+            tag = "category_collapsed" if is_collapsed else "category_header"
+
             self._tree.insert(
                 "",
                 tk.END,
-                values=(f"📁 {cat_name}", "", "", "", f"{len(cmds)} команд"),
-                tags=("category_header",),
+                values=(f"{icon} {cat_name}", "", "", "", f"{len(cmds)} команд"),
+                tags=(tag,),
             )
 
-            for cmd in cmds:
-                current = cmd.current_hotkey or "—"
-                suggested = cmd.suggested_hotkey or "—"
+            if not is_collapsed:
+                for cmd in cmds:
+                    current = cmd.current_hotkey or "—"
+                    suggested = cmd.suggested_hotkey or "—"
 
-                status_map = {
-                    "assigned": "✅ Назначена",
-                    "needs_assignment": "🔄 Требует назначения",
-                    "duplicate": "⚠️ Дубликат",
-                }
-                status = status_map.get(cmd.status, cmd.status)
-                tag = cmd.status
+                    status_map = {
+                        "assigned": "✅ Назначена",
+                        "needs_assignment": "🔄 Требует назначения",
+                        "duplicate": "⚠️ Дубликат",
+                    }
+                    status = status_map.get(cmd.status, cmd.status)
+                    tag = cmd.status
 
-                self._tree.insert(
-                    "",
-                    tk.END,
-                    values=("", cmd.name, current, suggested, status),
-                    tags=(tag,),
-                )
+                    self._tree.insert(
+                        "",
+                        tk.END,
+                        values=("", cmd.name, current, suggested, status),
+                        tags=(tag,),
+                    )
 
         summary = self.result.summary()
         self._stats_label.config(
