@@ -52,7 +52,6 @@ class WindowsConflictDB:
             "Ctrl+X": "Вырезать",
             "Ctrl+Z": "Отменить",
             "Ctrl+Y": "Повторить",
-            "Ctrl+A": "Выделить все",
             "Ctrl+S": "Сохранить",
             "Ctrl+O": "Открыть",
             "Ctrl+N": "Новый",
