@@ -28,7 +28,7 @@ def parse_pdf(
     cache = (
         OCRCache(
             cache_dir=config.cache.directory,
-            max_age_hours=config.cache.max_age,
+            max_age_hours=config.cache.max_age_hours,
         )
         if use_cache and config.cache.enabled
         else None
