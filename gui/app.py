@@ -93,6 +93,7 @@ class HotkeyManagerApp:
         self._tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
+        self._tree.tag_configure("category_header", background="#4472C4", foreground="white", font=("Arial", 10, "bold"))
         self._tree.tag_configure("assigned", background="#C6EFCE")
         self._tree.tag_configure("needs_assignment", background="#FFEB9C")
         self._tree.tag_configure("duplicate", background="#FFC7CE")
@@ -159,31 +160,38 @@ class HotkeyManagerApp:
         if not self.result:
             return
 
+        categories: dict[str, list] = {}
         for cmd in self.result.commands:
-            current = cmd.current_hotkey or "—"
-            suggested = cmd.suggested_hotkey or "—"
+            if cmd.category not in categories:
+                categories[cmd.category] = []
+            categories[cmd.category].append(cmd)
 
-            status_map = {
-                "assigned": "✅ Назначена",
-                "needs_assignment": "🔄 Требует назначения",
-                "duplicate": "⚠️ Дубликат",
-            }
-            status = status_map.get(cmd.status, cmd.status)
-
-            tag = cmd.status
-
+        for cat_name, cmds in categories.items():
             self._tree.insert(
                 "",
                 tk.END,
-                values=(
-                    cmd.category,
-                    cmd.name,
-                    current,
-                    suggested,
-                    status,
-                ),
-                tags=(tag,),
+                values=(f"📁 {cat_name}", "", "", "", f"{len(cmds)} команд"),
+                tags=("category_header",),
             )
+
+            for cmd in cmds:
+                current = cmd.current_hotkey or "—"
+                suggested = cmd.suggested_hotkey or "—"
+
+                status_map = {
+                    "assigned": "✅ Назначена",
+                    "needs_assignment": "🔄 Требует назначения",
+                    "duplicate": "⚠️ Дубликат",
+                }
+                status = status_map.get(cmd.status, cmd.status)
+                tag = cmd.status
+
+                self._tree.insert(
+                    "",
+                    tk.END,
+                    values=("", cmd.name, current, suggested, status),
+                    tags=(tag,),
+                )
 
         summary = self.result.summary()
         self._stats_label.config(
