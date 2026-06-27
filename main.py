@@ -59,7 +59,12 @@ def main():
     parser.add_argument(
         "--gui",
         action="store_true",
-        help="Запустить графический интерфейс",
+        help="Запустить графический интерфейс (Tkinter)",
+    )
+    parser.add_argument(
+        "--gui-qt",
+        action="store_true",
+        help="Запустить графический интерфейс (PySide6/Qt)",
     )
     parser.add_argument(
         "-v", "--verbose",
@@ -82,6 +87,16 @@ def main():
         cache = OCRCache(cache_dir=config.cache.directory)
         count = cache.clear()
         print(f"Очищено {count} файлов кэша")
+        sys.exit(0)
+
+    if args.gui_qt:
+        try:
+            from .gui.app_qt import run_qt_app
+            run_qt_app()
+        except ImportError:
+            print("PySide6 не установлен. Установите: pip install PySide6")
+            print("Или используйте --gui для Tkinter версии")
+            sys.exit(1)
         sys.exit(0)
 
     if args.gui:

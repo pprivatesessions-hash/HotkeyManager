@@ -1,112 +1,177 @@
-hotkey_manager:
-  prefix_combos:
-    - "Ctrl+Alt"
-    - "Ctrl+Shift+Alt"
+semantic_hints:
+  # Команды редактирования
+  Destroy: "D"
+  Copy: "C"
+  Paste: "V"
+  Cut: "X"
+  Undo: "Z"
+  Redo: "Y"
+  Save: "S"
+  Open: "O"
+  New: "N"
+  Print: "P"
+  Select: "A"
+  Find: "F"
+  Delete: "Delete"
+  Move: "M"
+  Rotate: "R"
+  Scale: "S"
+  Zoom: "Z"
+  Measure: "L"
+  Dimension: "D"
+  Block: "B"
+  Group: "G"
+  Ungroup: "U"
+  Explode: "X"
+  Mirror: "M"
+  Array: "A"
+  Offset: "O"
+  Trim: "T"
+  Extend: "E"
+  Fillet: "F"
+  Chamfer: "C"
+  Text: "T"
+  Line: "L"
+  Rectangle: "R"
+  Circle: "C"
+  Arc: "A"
+  Polyline: "P"
+  Spline: "S"
+  Hatch: "H"
+  Layer: "L"
+  Color: "C"
+  Material: "M"
 
-  exclude_keys:
-    - "Ctrl+C"
-    - "Ctrl+V"
-    - "Ctrl+X"
-    - "Ctrl+Z"
-    - "Ctrl+Y"
-    - "Ctrl+S"
-    - "Ctrl+O"
-    - "Ctrl+N"
-    - "Ctrl+P"
-    - "Ctrl+A"
-    - "Ctrl+F"
-    - "Ctrl+H"
-    - "Delete"
-    - "Insert"
-    - "F1"
-    - "F2"
-    - "F3"
-    - "F4"
-    - "F5"
-    - "F6"
-    - "F7"
-    - "F8"
-    - "F9"
-    - "F10"
-    - "F11"
-    - "F12"
+command_keywords:
+  # Разрушение / удаление
+  разрушить: "D"
+  уничтожить: "D"
+  удалить: "X"
+  стереть: "X"
+  
+  # Буфер обмена
+  копировать: "C"
+  вставить: "V"
+  вставка: "V"
+  вырезать: "X"
+  
+  # История
+  отменить: "Z"
+  повторить: "Y"
+  
+  # Файл
+  сохранить: "S"
+  открыть: "O"
+  новый: "N"
+  печать: "P"
+  
+  # Выделение / поиск
+  выделить: "A"
+  найти: "F"
+  заменить: "H"
+  
+  # Трансформация
+  переместить: "M"
+  двигать: "M"
+  повернуть: "R"
+  вращать: "R"
+  масштаб: "Z"
+  приблизить: "Z"
+  отдалить: "Z"
+  
+  # Измерение
+  линейка: "L"
+  размер: "D"
+  замер: "L"
+  
+  # Блоки и группы
+  блок: "B"
+  группа: "G"
+  группировка: "G"
+  разгруппировать: "U"
+  
+  # Геометрия
+  зеркало: "M"
+  отразить: "M"
+  массив: "A"
+  копия: "C"
+  смещение: "O"
+  сдвинуть: "O"
+  
+  # Редактирование
+  обрезать: "T"
+  удлинить: "E"
+  скруглить: "F"
+  скос: "C"
+  
+  # Объекты
+  текст: "T"
+  надпись: "T"
+  линия: "L"
+  отрезок: "L"
+  прямоугольник: "R"
+  квадрат: "R"
+  окружность: "C"
+  круг: "C"
+  дуга: "A"
+  штриховка: "H"
+  заливка: "H"
+  
+  # Организация
+  слой: "L"
+  уровень: "L"
+  цвет: "C"
+  материал: "M"
+  текстура: "T"
+  
+  # Конструкция
+  конструкция: "K"
+  деталь: "D"
+  сборка: "S"
+  
+  # Операции
+  экспорт: "E"
+  импорт: "I"
+  параметры: "P"
+  настройка: "S"
+  справка: "H"
+  проверка: "C"
+  анализ: "A"
+  спецификация: "S"
+  отчет: "R"
 
-  strategy:
-    use_semantic: true
-    use_category_weight: true
-    use_frequency: false
-    prefer_key_proximity: true
-
-  category_weights:
-    Блоки: 1.0
-    Модель: 0.95
-    Правка: 0.9
-    Рисование: 0.85
-    Вид: 0.8
-    Размеры: 0.7
-    Анализ: 0.65
-    Материал: 0.6
-    Сервис: 0.55
-    Файл: 0.5
-
-  semantic_hints:
-    Destroy: "D"
-    Copy: "C"
-    Paste: "V"
-    Cut: "X"
-    Undo: "Z"
-    Redo: "Y"
-    Save: "S"
-    Open: "O"
-    New: "N"
-    Print: "P"
-    Select: "A"
-    Find: "F"
-    Delete: "Delete"
-    Move: "M"
-    Rotate: "R"
-    Scale: "S"
-    Zoom: "Z"
-    Measure: "L"
-    Dimension: "D"
-    Block: "B"
-    Group: "G"
-    Ungroup: "U"
-    Explode: "X"
-    Mirror: "M"
-    Array: "A"
-    Offset: "O"
-    Trim: "T"
-    Extend: "E"
-    Fillet: "F"
-    Chamfer: "C"
-    Text: "T"
-    Line: "L"
-    Rectangle: "R"
-    Circle: "C"
-    Arc: "A"
-    Polyline: "P"
-    Spline: "S"
-    Hatch: "H"
-    Layer: "L"
-    Color: "C"
-    Material: "M"
-
-ocr:
-  engine: "tesseract"
-  languages:
-    - "rus"
-    - "eng"
-  dpi: 300
-  preprocess: true
-
-cache:
-  enabled: true
-  directory: "cache"
-  max_age_hours: 24
-
-windows_conflicts:
-  check_system: true
-  check_reserved: true
-  check_risky: true
-  allow_risky: false
+# Раскладка клавиатуры для транслитерации
+keyboard_layout:
+  а: "A"
+  б: "B"
+  в: "V"
+  г: "G"
+  д: "D"
+  е: "E"
+  ё: "YO"
+  ж: "ZH"
+  з: "Z"
+  и: "I"
+  й: "Y"
+  к: "K"
+  л: "L"
+  м: "M"
+  н: "N"
+  о: "O"
+  п: "P"
+  р: "R"
+  с: "S"
+  т: "T"
+  у: "U"
+  ф: "F"
+  х: "KH"
+  ц: "TS"
+  ч: "CH"
+  ш: "SH"
+  щ: "SHCH"
+  ъ: ""
+  ы: "Y"
+  ь: ""
+  э: "E"
+  ю: "YU"
+  я: "YA"

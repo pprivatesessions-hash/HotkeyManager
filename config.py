@@ -41,6 +41,8 @@ class HotkeyConfig:
     exclude_keys: List[str] = field(default_factory=list)
     category_weights: Dict[str, float] = field(default_factory=dict)
     semantic_hints: Dict[str, str] = field(default_factory=dict)
+    command_keywords: Dict[str, str] = field(default_factory=dict)
+    keyboard_layout: Dict[str, str] = field(default_factory=dict)
     strategy: StrategyConfig = field(default_factory=StrategyConfig)
     ocr: OCRConfig = field(default_factory=OCRConfig)
     cache: CacheConfig = field(default_factory=CacheConfig)
@@ -89,18 +91,27 @@ def _parse_config(data: dict) -> HotkeyConfig:
         max_age_hours=cache_data.get("max_age_hours", 24),
     )
 
+    semantic_hints = data.get("semantic_hints", {})
+    command_keywords = data.get("command_keywords", {})
+    keyboard_layout = data.get("keyboard_layout", {})
+
     config = HotkeyConfig(
         prefix_combos=hm.get("prefix_combos", ["Ctrl+Alt", "Ctrl+Shift+Alt"]),
         exclude_keys=hm.get("exclude_keys", []),
         category_weights=hm.get("category_weights", {}),
-        semantic_hints=hm.get("semantic_hints", {}),
+        semantic_hints=semantic_hints,
+        command_keywords=command_keywords,
+        keyboard_layout=keyboard_layout,
         strategy=strategy,
         ocr=ocr,
         cache=cache,
     )
 
-    logger.info(f"Конфиг загружен: {len(config.prefix_combos)} префиксов, "
-                f"{len(config.semantic_hints)} семантических подсказок")
+    logger.info(
+        f"Конфиг загружен: {len(config.prefix_combos)} префиксов, "
+        f"{len(config.semantic_hints)} семантических подсказок, "
+        f"{len(config.command_keywords)} ключевых слов"
+    )
 
     return config
 

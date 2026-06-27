@@ -2,16 +2,12 @@ import pytest
 from HotkeyManager.models.command import RawCommand
 from HotkeyManager.analyzer import analyze_commands
 from HotkeyManager.ai.engine import AIEngine
-from HotkeyManager.config import HotkeyConfig
+from HotkeyManager.config import HotkeyConfig, load_config
 
 
 class TestAIEngine:
     def setup_method(self):
-        self.config = HotkeyConfig(
-            prefix_combos=["Ctrl+Alt"],
-            exclude_keys=["Ctrl+C", "Ctrl+V"],
-            semantic_hints={},
-        )
+        self.config = load_config()
         self.engine = AIEngine(self.config)
 
     def test_ai_generate_basic(self):
@@ -77,3 +73,21 @@ class TestAIEngine:
 
         cmd = result.commands[0]
         assert cmd.suggested_hotkey is not None
+
+    def test_ai_custom_keywords(self):
+        custom_config = HotkeyConfig(
+            prefix_combos=["Ctrl+Alt"],
+            exclude_keys=[],
+            command_keywords={"тестовый": "T"},
+            keyboard_layout={"а": "A"},
+        )
+        engine = AIEngine(custom_config)
+
+        raw_commands = [
+            RawCommand(category="Тест", name="Тестовый модуль", hotkey=None, page=1),
+        ]
+        result = analyze_commands(raw_commands)
+        result = engine.generate(result)
+
+        cmd = result.commands[0]
+        assert cmd.suggested_hotkey == "Ctrl+Alt+T"

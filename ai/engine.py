@@ -10,88 +10,6 @@ from ..windows_conflicts.checker import WindowsConflictChecker
 
 logger = logging.getLogger(__name__)
 
-RUSSIAN_TO_LATIN = {
-    "а": "A", "б": "B", "в": "V", "г": "G", "д": "D",
-    "е": "E", "ё": "YO", "ж": "ZH", "з": "Z", "и": "I",
-    "й": "Y", "к": "K", "л": "L", "м": "M", "н": "N",
-    "о": "O", "п": "P", "р": "R", "с": "S", "т": "T",
-    "у": "U", "ф": "F", "х": "KH", "ц": "TS", "ч": "CH",
-    "ш": "SH", "щ": "SHCH", "ъ": "", "ы": "Y", "ь": "",
-    "э": "E", "ю": "YU", "я": "YA",
-}
-
-COMMAND_KEYWORDS = {
-    "разрушить": "D",
-    "уничтожить": "D",
-    "удалить": "X",
-    "стереть": "X",
-    "копировать": "C",
-    "вставить": "V",
-    "вставка": "V",
-    "вырезать": "X",
-    "отменить": "Z",
-    "повторить": "Y",
-    "сохранить": "S",
-    "открыть": "O",
-    "новый": "N",
-    "печать": "P",
-    "выделить": "A",
-    "найти": "F",
-    "заменить": "H",
-    "переместить": "M",
-    "двигать": "M",
-    "повернуть": "R",
-    "вращать": "R",
-    "масштаб": "Z",
-    "приблизить": "Z",
-    "отдалить": "Z",
-    "линейка": "L",
-    "размер": "D",
-    "замер": "L",
-    "блок": "B",
-    "группа": "G",
-    "группировка": "G",
-    "разгруппировать": "U",
-    "зеркало": "M",
-    "отразить": "M",
-    "массив": "A",
-    "копия": "C",
-    "смещение": "O",
-    "сдвинуть": "O",
-    "обрезать": "T",
-    "удлинить": "E",
-    "скруглить": "F",
-    "скос": "C",
-    "текст": "T",
-    "надпись": "T",
-    "линия": "L",
-    "отрезок": "L",
-    "прямоугольник": "R",
-    "квадрат": "R",
-    "окружность": "C",
-    "круг": "C",
-    "дуга": "A",
-    "штриховка": "H",
-    "заливка": "H",
-    "слой": "L",
-    "уровень": "L",
-    "цвет": "C",
-    "материал": "M",
-    "текстура": "T",
-    "конструкция": "K",
-    "деталь": "D",
-    "сборка": "S",
-    "экспорт": "E",
-    "импорт": "I",
-    "параметры": "P",
-    "настройка": "S",
-    "справка": "H",
-    "проверка": "C",
-    "анализ": "A",
-    "спецификация": "S",
-    "отчет": "R",
-}
-
 
 @dataclass
 class AIResult:
@@ -106,6 +24,14 @@ class AIEngine:
         self.config = config or DEFAULT_CONFIG
         self.checker = WindowsConflictChecker()
         self._used: Set[str] = set()
+
+        self.command_keywords = self.config.command_keywords
+        self.keyboard_layout = self.config.keyboard_layout
+
+        logger.info(
+            f"AI Engine: {len(self.command_keywords)} ключевых слов, "
+            f"{len(self.keyboard_layout)} символов в раскладке"
+        )
 
     def generate(
         self,
@@ -166,20 +92,20 @@ class AIEngine:
     def _extract_key(self, name: str) -> Tuple[Optional[str], float, str]:
         lower = name.lower()
 
-        for keyword, key in COMMAND_KEYWORDS.items():
+        for keyword, key in self.command_keywords.items():
             if keyword in lower:
                 return key, 0.9, f"Ключевое слово: {keyword}"
 
         words = lower.split()
         if words:
             first_word = words[0]
-            if first_word in COMMAND_KEYWORDS:
-                key = COMMAND_KEYWORDS[first_word]
+            if first_word in self.command_keywords:
+                key = self.command_keywords[first_word]
                 return key, 0.85, f"Первое слово: {first_word}"
 
         if name and name[0].isalpha():
-            if name[0] in RUSSIAN_TO_LATIN:
-                key = RUSSIAN_TO_LATIN[name[0]]
+            if name[0] in self.keyboard_layout:
+                key = self.keyboard_layout[name[0]]
                 if len(key) == 1:
                     return key, 0.7, f"Первая буква: {name[0]}"
             elif name[0].upper() in string.ascii_uppercase:
@@ -187,8 +113,8 @@ class AIEngine:
 
         if name:
             first_char = name[0].lower()
-            if first_char in RUSSIAN_TO_LATIN:
-                key = RUSSIAN_TO_LATIN[first_char]
+            if first_char in self.keyboard_layout:
+                key = self.keyboard_layout[first_char]
                 if len(key) == 1:
                     return key, 0.6, f"Транслитерация: {name[0]}"
 

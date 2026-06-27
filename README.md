@@ -9,7 +9,7 @@
 | Функция | Описание |
 |---------|----------|
 | 📄 **PDF парсер** | Извлечение команд из PDF с OCR |
-| 🖼️ **GUI** | Удобный графический интерфейс |
+| 🖼️ **GUI** | Tkinter (встроенный) или PySide6/Qt |
 | 🤖 **AI режим** | Умное назначение по семантике |
 | 🔄 **Сравнение** | Анализ изменений между версиями |
 | ⚠️ **Конфликты** | Проверка запрещённых комбинаций Windows |
@@ -43,10 +43,13 @@ pip install -r requirements.txt
 ### Графический интерфейс
 
 ```bash
+# Tkinter (встроенный, без доп. зависимостей)
 python -m HotkeyManager --gui
-```
 
-![GUI Preview](https://via.placeholder.com/800x400?text=HotkeyManager+GUI)
+# PySide6/Qt (современный интерфейс)
+pip install PySide6
+python -m HotkeyManager --gui-qt
+```
 
 ### Командная строка
 
@@ -70,7 +73,8 @@ python -m HotkeyManager hotkeys.pdf -v
 |-------|----------|
 | `-o, --output` | Папка для выходных файлов (по умолчанию: `output`) |
 | `-c, --config` | Путь к файлу конфигурации |
-| `--gui` | Запустить графический интерфейс |
+| `--gui` | Запустить GUI (Tkinter) |
+| `--gui-qt` | Запустить GUI (PySide6/Qt) |
 | `--ai` | Использовать AI генерацию |
 | `--no-generate` | Не генерировать новые клавиши |
 | `--no-cache` | Отключить кэширование OCR |
@@ -161,7 +165,8 @@ HotkeyManager/
 │   └── cache.py              # Кэширование результатов
 │
 ├── gui/                      # Графический интерфейс
-│   └── app.py                # Tkinter приложение
+│   ├── app.py                # Tkinter приложение
+│   └── app_qt.py             # PySide6/Qt приложение
 │
 ├── ai/                       # AI генерация
 │   └── engine.py             # Семантический анализ
@@ -177,7 +182,7 @@ HotkeyManager/
 ├── exporter_md.py            # Экспорт в Markdown
 ├── exporter_json.py          # Экспорт в JSON
 │
-├── tests/                    # Тесты (42 теста)
+├── tests/                    # Тесты (43 теста)
 │   ├── test_analyzer.py
 │   ├── test_generator.py
 │   ├── test_parser.py
@@ -191,31 +196,55 @@ HotkeyManager/
 
 ## ⚙️ Конфигурация
 
-Файл `config.yaml`:
+Файл `config.yaml` — вся логика настраивается без изменения кода:
 
 ```yaml
+# Семантические подсказки (английские команды)
+semantic_hints:
+  Destroy: "D"
+  Copy: "C"
+  Paste: "V"
+
+# Ключевые слова для AI (русские команды)
+command_keywords:
+  разрушить: "D"
+  копировать: "C"
+  вставить: "V"
+  повернуть: "R"
+  линия: "L"
+  материал: "M"
+
+# Раскладка для транслитерации
+keyboard_layout:
+  а: "A"
+  б: "B"
+  в: "V"
+  # ...
+
 hotkey_manager:
   prefix_combos:
     - "Ctrl+Alt"
     - "Ctrl+Shift+Alt"
 
   strategy:
-    use_semantic: true        # Семантический анализ
-    use_category_weight: true # Вес категорий
-    prefer_key_proximity: true # Близость клавиш
+    use_semantic: true
+    use_category_weight: true
+    prefer_key_proximity: true
 
   category_weights:
     Блоки: 1.0
     Модель: 0.95
     Правка: 0.9
-    Рисование: 0.85
-    Вид: 0.8
+```
 
-  semantic_hints:
-    Destroy: "D"
-    Copy: "C"
-    Paste: "V"
-    # ... больше подсказок
+### Добавление своих правил
+
+Просто отредактируй `config.yaml`:
+
+```yaml
+command_keywords:
+  моя_команда: "M"
+ 另一个: "X"
 ```
 
 ## 🧪 Тесты
@@ -225,7 +254,7 @@ hotkey_manager:
 pytest HotkeyManager/tests/ -v
 
 # Результат
-42 passed in 1.04s
+43 passed in 0.97s
 ```
 
 ### Покрытие
@@ -235,10 +264,10 @@ pytest HotkeyManager/tests/ -v
 | analyzer | 5 |
 | generator | 6 |
 | parser | 8 |
-| ai | 6 |
+| ai | 7 |
 | compare | 6 |
 | windows_conflicts | 9 |
-| **Итого** | **42** |
+| **Итого** | **43** |
 
 ## 📊 Экспорт
 
@@ -281,7 +310,8 @@ pytest HotkeyManager/tests/ -v
 - **Pillow** — обработка изображений
 - **openpyxl** — экспорт в Excel
 - **PyYAML** — конфигурация
-- **tkinter** — GUI
+- **tkinter** — GUI (встроенный)
+- **PySide6** — GUI (опционально, Qt)
 - **pytest** — тестирование
 
 ## 📝 Лицензия
