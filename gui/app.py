@@ -153,7 +153,8 @@ class HotkeyManagerApp:
                 cat = cmd.category or "Без категории"
                 if cat not in found_categories:
                     found_categories[cat] = []
-                found_categories[cat].append(cmd)
+                if cmd.name != cat:
+                    found_categories[cat].append(cmd)
 
             existing_names = {c.name for c in self._categories}
             added = 0
@@ -353,8 +354,13 @@ class HotkeyManagerApp:
             cat_label_frame.pack(fill=tk.X)
 
             icon = "▸" if block.collapsed else "▼"
+            cmd_count = f"({len(block.commands)} команд)" if block.commands else "(нет команд)"
+
+            header_row = ttk.Frame(cat_label_frame)
+            header_row.pack(fill=tk.X, padx=2, pady=2)
+
             toggle_btn = tk.Button(
-                cat_label_frame,
+                header_row,
                 text=f"{icon} {block.name}",
                 font=("Arial", 10, "bold"),
                 bg="#4472C4",
@@ -363,27 +369,44 @@ class HotkeyManagerApp:
                 relief=tk.FLAT,
                 command=lambda n=block.name: self._toggle_category(n),
             )
-            toggle_btn.pack(fill=tk.X, padx=2, pady=2)
+            toggle_btn.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+            count_label = tk.Label(
+                header_row,
+                text=cmd_count,
+                font=("Arial", 9),
+                bg="#4472C4",
+                fg="white",
+            )
+            count_label.pack(side=tk.RIGHT, padx=10)
 
             if not block.collapsed:
-                for cmd in block.commands:
-                    cmd_frame = ttk.Frame(cat_frame)
-                    cmd_frame.pack(fill=tk.X, padx=(20, 2), pady=1)
+                if not block.commands:
+                    empty_frame = ttk.Frame(cat_frame)
+                    empty_frame.pack(fill=tk.X, padx=(30, 2), pady=5)
+                    ttk.Label(
+                        empty_frame,
+                        text="Нет команд. Нажмите 'Команда' для импорта.",
+                        font=("Arial", 9),
+                        foreground="gray",
+                    ).pack(side=tk.LEFT)
+                else:
+                    for cmd in block.commands:
+                        cmd_frame = ttk.Frame(cat_frame)
+                        cmd_frame.pack(fill=tk.X, padx=(30, 2), pady=1)
 
-                    name_label = ttk.Label(cmd_frame, text=cmd.name, font=("Arial", 10), width=40, anchor="w")
-                    name_label.pack(side=tk.LEFT, padx=5)
+                        name_label = ttk.Label(
+                            cmd_frame, text=cmd.name, font=("Arial", 10), width=45, anchor="w"
+                        )
+                        name_label.pack(side=tk.LEFT, padx=5)
 
-                    hotkey = cmd.hotkey or "—"
-                    hotkey_color = "green" if cmd.hotkey and not self._generated else "black"
-                    if self._generated and cmd.hotkey:
-                        hotkey_color = "#0066CC"
+                        hotkey = cmd.hotkey or "—"
+                        hotkey_label = ttk.Label(
+                            cmd_frame, text=hotkey, font=("Arial", 10, "bold"), width=25, anchor="w"
+                        )
+                        hotkey_label.pack(side=tk.LEFT, padx=5)
 
-                    hotkey_label = ttk.Label(
-                        cmd_frame, text=hotkey, font=("Arial", 10, "bold"), width=25, anchor="w",
-                    )
-                    hotkey_label.pack(side=tk.LEFT, padx=5)
-
-                    total_commands += 1
+                        total_commands += 1
 
         self._stats_label.config(text=f"Категорий: {len(self._categories)} | Команд: {total_commands}")
 
