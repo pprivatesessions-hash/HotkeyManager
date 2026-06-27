@@ -188,11 +188,14 @@ class HotkeyManagerApp:
                 if block.name == category_name:
                     existing_names = {c.name for c in block.commands}
                     added = 0
+                    skipped = 0
                     for cmd in raw_commands:
                         if cmd.name not in existing_names:
                             block.commands.append(cmd)
                             existing_names.add(cmd.name)
                             added += 1
+                        else:
+                            skipped += 1
 
                     block.collapsed = False
 
@@ -200,7 +203,11 @@ class HotkeyManagerApp:
                     self._btn_generate.config(state=tk.NORMAL)
                     self._btn_save.config(state=tk.DISABLED)
                     self._rebuild_table()
-                    self._status_label.config(text=f"В '{category_name}' добавлено {added} команд")
+
+                    msg = f"В '{category_name}' добавлено: {added}"
+                    if skipped > 0:
+                        msg += f", пропущено (дубли): {skipped}"
+                    self._status_label.config(text=msg)
                     break
         except Exception as e:
             messagebox.showerror("Ошибка", f"Ошибка импорта:\n{e}")
@@ -229,26 +236,32 @@ class HotkeyManagerApp:
 
             existing_names = {c.name for c in self._categories}
             added = 0
+            skipped = []
             for cat_name, cmds in found_categories.items():
                 if cat_name not in existing_names:
                     block = CategoryBlock(cat_name)
                     block.commands = cmds
                     self._categories.append(block)
+                    existing_names.add(cat_name)
                     added += 1
                 else:
+                    skipped.append(cat_name)
                     for block in self._categories:
                         if block.name == cat_name:
                             existing_cmd_names = {c.name for c in block.commands}
-                            for cmd in cmds:
-                                if cmd.name not in existing_cmd_names:
-                                    block.commands.append(cmd)
-                                    existing_cmd_names.add(cmd.name)
+                            new_cmds = [c for c in cmds if c.name not in existing_cmd_names]
+                            block.commands.extend(new_cmds)
+                            break
 
             self._generated = False
             self._btn_generate.config(state=tk.NORMAL if self._categories else tk.DISABLED)
             self._btn_save.config(state=tk.DISABLED)
             self._rebuild_table()
-            self._status_label.config(text=f"Добавлено категорий: {added}, всего команд: {sum(len(c.commands) for c in self._categories)}")
+
+            msg = f"Добавлено категорий: {added}"
+            if skipped:
+                msg += f", пропущено (дубли): {', '.join(skipped)}"
+            self._status_label.config(text=msg)
         except Exception as e:
             messagebox.showerror("Ошибка", f"Ошибка импорта:\n{e}")
 
