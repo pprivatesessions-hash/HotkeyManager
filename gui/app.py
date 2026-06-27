@@ -113,24 +113,55 @@ class HotkeyManagerApp:
 
     def _open_pdf(self):
         path = filedialog.askopenfilename(
-            title="Выберите PDF файл",
-            filetypes=[("PDF files", "*.pdf"), ("All files", "*.*")],
+            title="Выберите файл",
+            filetypes=[
+                ("Все поддерживаемые", "*.pdf *.jpg *.jpeg *.png *.bmp *.tiff"),
+                ("PDF files", "*.pdf"),
+                ("Image files", "*.jpg *.jpeg *.png *.bmp *.tiff"),
+                ("All files", "*.*"),
+            ],
         )
         if not path:
             return
 
-        self._pdf_label.config(text=f"PDF: {Path(path).name}")
+        self._pdf_label.config(text=f"Файл: {Path(path).name}")
         self._status_label.config(text="Загрузка...")
         self.root.update()
 
         try:
-            raw_commands = parse_pdf(path, config=self.config)
+            ext = Path(path).suffix.lower()
+
+            if ext == ".pdf":
+                raw_commands = parse_pdf(path, config=self.config)
+            elif ext in (".jpg", ".jpeg", ".png", ".bmp", ".tiff"):
+                raw_commands = self._parse_image(path)
+            else:
+                messagebox.showerror("Ошибка", f"Неподдерживаемый формат: {ext}")
+                return
+
             self.result = analyze_commands(raw_commands)
             self._update_tree()
             self._status_label.config(text=f"Загружено: {len(self.result.commands)} команд")
         except Exception as e:
-            messagebox.showerror("Ошибка", f"Не удалось загрузить PDF:\n{e}")
+            messagebox.showerror("Ошибка", f"Не удалось загрузить файл:\n{e}")
             self._status_label.config(text="Ошибка загрузки")
+
+    def _parse_image(self, image_path: str):
+        from ..models.command import RawCommand
+        from ..ocr.tesseract_provider import TesseractProvider
+        from PIL import Image
+
+        ocr = TesseractProvider(
+            languages=self.config.ocr.languages,
+            dpi=self.config.ocr.dpi,
+            preprocess=self.config.ocr.preprocess,
+        )
+
+        img = Image.open(image_path)
+        text = ocr.recognize(img)
+
+        from ..pdf_parser import _extract_commands
+        return _extract_commands([text])
 
     def _generate(self):
         if not self.result:
