@@ -1,0 +1,112 @@
+hotkey_manager:
+  prefix_combos:
+    - "Ctrl+Alt"
+    - "Ctrl+Shift+Alt"
+
+  exclude_keys:
+    - "Ctrl+C"
+    - "Ctrl+V"
+    - "Ctrl+X"
+    - "Ctrl+Z"
+    - "Ctrl+Y"
+    - "Ctrl+S"
+    - "Ctrl+O"
+    - "Ctrl+N"
+    - "Ctrl+P"
+    - "Ctrl+A"
+    - "Ctrl+F"
+    - "Ctrl+H"
+    - "Delete"
+    - "Insert"
+    - "F1"
+    - "F2"
+    - "F3"
+    - "F4"
+    - "F5"
+    - "F6"
+    - "F7"
+    - "F8"
+    - "F9"
+    - "F10"
+    - "F11"
+    - "F12"
+
+  strategy:
+    use_semantic: true
+    use_category_weight: true
+    use_frequency: false
+    prefer_key_proximity: true
+
+  category_weights:
+    Блоки: 1.0
+    Модель: 0.95
+    Правка: 0.9
+    Рисование: 0.85
+    Вид: 0.8
+    Размеры: 0.7
+    Анализ: 0.65
+    Материал: 0.6
+    Сервис: 0.55
+    Файл: 0.5
+
+  semantic_hints:
+    Destroy: "D"
+    Copy: "C"
+    Paste: "V"
+    Cut: "X"
+    Undo: "Z"
+    Redo: "Y"
+    Save: "S"
+    Open: "O"
+    New: "N"
+    Print: "P"
+    Select: "A"
+    Find: "F"
+    Delete: "Delete"
+    Move: "M"
+    Rotate: "R"
+    Scale: "S"
+    Zoom: "Z"
+    Measure: "L"
+    Dimension: "D"
+    Block: "B"
+    Group: "G"
+    Ungroup: "U"
+    Explode: "X"
+    Mirror: "M"
+    Array: "A"
+    Offset: "O"
+    Trim: "T"
+    Extend: "E"
+    Fillet: "F"
+    Chamfer: "C"
+    Text: "T"
+    Line: "L"
+    Rectangle: "R"
+    Circle: "C"
+    Arc: "A"
+    Polyline: "P"
+    Spline: "S"
+    Hatch: "H"
+    Layer: "L"
+    Color: "C"
+    Material: "M"
+
+ocr:
+  engine: "tesseract"
+  languages:
+    - "rus"
+    - "eng"
+  dpi: 300
+  preprocess: true
+
+cache:
+  enabled: true
+  directory: "cache"
+  max_age_hours: 24
+
+windows_conflicts:
+  check_system: true
+  check_reserved: true
+  check_risky: true
+  allow_risky: false
