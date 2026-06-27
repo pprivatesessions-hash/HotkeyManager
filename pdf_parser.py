@@ -76,26 +76,22 @@ def _extract_commands(pages_text: list[str]) -> list[RawCommand]:
     commands = []
     categories_found: list[str] = []
 
+    all_lines = []
     for page_num, text in enumerate(pages_text, 1):
         lines = text.split("\n")
-        current_category = ""
-
         for line in lines:
             line = line.strip()
-            if not line:
-                continue
+            if line:
+                all_lines.append((line, page_num))
 
-            if _is_category(line):
-                current_category = _clean_category(line)
-                if current_category not in categories_found:
-                    categories_found.append(current_category)
-                continue
+    has_hotkeys = any(re.search(r"(Ctrl\+|Alt\+|Shift\+|F\d+|\[.*\])", line) for line, _ in all_lines)
+    all_short = all(len(line) < 40 for line, _ in all_lines)
 
-            parsed = _parse_command_line(line, current_category, page_num)
-            if parsed:
-                commands.append(parsed)
-
-    if not commands and categories_found:
+    if all_short and not has_hotkeys:
+        for line, page_num in all_lines:
+            cat_name = _clean_category(line)
+            if cat_name and cat_name not in categories_found:
+                categories_found.append(cat_name)
         for cat in categories_found:
             commands.append(RawCommand(
                 category=cat,
@@ -103,6 +99,19 @@ def _extract_commands(pages_text: list[str]) -> list[RawCommand]:
                 hotkey=None,
                 page=1,
             ))
+        return commands
+
+    current_category = ""
+    for line, page_num in all_lines:
+        if _is_category(line):
+            current_category = _clean_category(line)
+            if current_category not in categories_found:
+                categories_found.append(current_category)
+            continue
+
+        parsed = _parse_command_line(line, current_category, page_num)
+        if parsed:
+            commands.append(parsed)
 
     return commands
 
