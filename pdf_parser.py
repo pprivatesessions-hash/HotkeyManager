@@ -197,21 +197,25 @@ def _clean_category(line: str) -> str:
 
 
 def _parse_command_line(line: str, category: str, page: int) -> RawCommand | None:
-    hotkey_pattern = r"(?:-\s*)?\[?(Ctrl\+[\w]+|Alt\+[\w]+|Shift\+[\w]+|F\d+)\]?"
-    match = re.search(hotkey_pattern, line, re.IGNORECASE)
+    bracket_pattern = r"\[([^\]]+)\]"
+    bracket_match = re.search(bracket_pattern, line)
 
-    hotkey = None
-    name = line
-
-    if match:
-        hotkey = match.group(1)
-        name = line[: match.start()].strip()
-        name = re.sub(r"[-–—]\s*$", "", name).strip()
-        name = re.sub(r"\s*[-–—]\s*\[.*\]\s*$", "", name).strip()
+    if bracket_match:
+        hotkey = bracket_match.group(1).strip()
+        name = line[: bracket_match.start()].strip()
+        name = re.sub(r"[-–—=]\s*$", "", name).strip()
     else:
-        name = line.strip()
+        hotkey_pattern = r"(?:-\s*)?(Ctrl\+[\w]+|Alt\+[\w]+|Shift\+[\w]+|F\d+)"
+        match = re.search(hotkey_pattern, line, re.IGNORECASE)
+        if match:
+            hotkey = match.group(1)
+            name = line[: match.start()].strip()
+            name = re.sub(r"[-–—]\s*$", "", name).strip()
+        else:
+            hotkey = None
+            name = line.strip()
 
-    name = re.sub(r"[-–—]\s*$", "", name).strip()
+    name = re.sub(r"[-–—=]\s*$", "", name).strip()
 
     if not name or len(name) < 2:
         return None
