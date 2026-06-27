@@ -1,12 +1,11 @@
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
 class RawCommand:
     category: str
     name: str
-    hotkey: Optional[str]
+    hotkey: str | None
     page: int
 
 
@@ -14,9 +13,9 @@ class RawCommand:
 class Command:
     category: str
     name: str
-    current_hotkey: Optional[str]
-    suggested_hotkey: Optional[str] = None
+    current_hotkey: str | None
+    suggested_hotkey: str | None = None
     status: str = "free"
-    conflict_with: Optional[str] = None
+    conflict_with: str | None = None
     priority: float = 0.0
-    semantic_hint: Optional[str] = None
+    semantic_hint: str | None = None

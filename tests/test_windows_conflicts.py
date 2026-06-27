@@ -1,6 +1,5 @@
-import pytest
-from HotkeyManager.windows_conflicts.database import WindowsConflictDB, ConflictLevel
 from HotkeyManager.windows_conflicts.checker import WindowsConflictChecker
+from HotkeyManager.windows_conflicts.database import ConflictLevel, WindowsConflictDB
 
 
 class TestWindowsConflicts:

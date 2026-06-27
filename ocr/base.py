@@ -1,6 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import List
-from pathlib import Path
 
 from PIL import Image
 
@@ -15,5 +13,5 @@ class OCRProvider(ABC):
         pass
 
     @abstractmethod
-    def get_supported_languages(self) -> List[str]:
+    def get_supported_languages(self) -> list[str]:
         pass

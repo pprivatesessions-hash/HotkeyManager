@@ -3,13 +3,13 @@ import logging
 import sys
 from pathlib import Path
 
-from .config import load_config
-from .pdf_parser import parse_pdf
 from .analyzer import analyze_commands
-from .generator import generate_hotkeys
+from .config import load_config
 from .exporter_excel import export_excel
-from .exporter_md import export_markdown
 from .exporter_json import export_json
+from .exporter_md import export_markdown
+from .generator import generate_hotkeys
+from .pdf_parser import parse_pdf
 
 logger = logging.getLogger(__name__)
 
@@ -33,12 +33,14 @@ def main():
         help="Путь к PDF файлу с горячими клавишами",
     )
     parser.add_argument(
-        "-o", "--output",
+        "-o",
+        "--output",
         default="output",
         help="Папка для выходных файлов (по умолчанию: output)",
     )
     parser.add_argument(
-        "-c", "--config",
+        "-c",
+        "--config",
         help="Путь к файлу конфигурации (config.yaml)",
     )
     parser.add_argument(
@@ -67,7 +69,8 @@ def main():
         help="Запустить графический интерфейс (PySide6/Qt)",
     )
     parser.add_argument(
-        "-v", "--verbose",
+        "-v",
+        "--verbose",
         action="store_true",
         help="Подробный вывод",
     )
@@ -84,6 +87,7 @@ def main():
 
     if args.clear_cache:
         from .ocr.cache import OCRCache
+
         cache = OCRCache(cache_dir=config.cache.directory)
         count = cache.clear()
         print(f"Очищено {count} файлов кэша")
@@ -92,6 +96,7 @@ def main():
     if args.gui_qt:
         try:
             from .gui.app_qt import run_qt_app
+
             run_qt_app()
         except ImportError:
             print("PySide6 не установлен. Установите: pip install PySide6")
@@ -101,6 +106,7 @@ def main():
 
     if args.gui:
         from .gui import HotkeyManagerApp
+
         app = HotkeyManagerApp()
         app.run()
         sys.exit(0)
@@ -133,6 +139,7 @@ def main():
         if args.ai:
             logger.info(f"AI генерация для {len(result.free)} команд...")
             from .ai.engine import AIEngine
+
             ai_engine = AIEngine(config)
             result = ai_engine.generate(result)
         else:

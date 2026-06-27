@@ -1,8 +1,7 @@
 import logging
-from typing import List, Set, Dict
 from dataclasses import dataclass
 
-from .database import WindowsConflictDB, ConflictLevel, HotkeyInfo
+from .database import ConflictLevel, HotkeyInfo, WindowsConflictDB
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +17,7 @@ class CheckResult:
 class WindowsConflictChecker:
     def __init__(self):
         self.db = WindowsConflictDB()
-        self._used_in_app: Set[str] = set()
+        self._used_in_app: set[str] = set()
 
     def mark_used(self, combo: str) -> None:
         self._used_in_app.add(combo)
@@ -76,6 +75,7 @@ class WindowsConflictChecker:
             return combo
 
         import string
+
         for letter in string.ascii_uppercase:
             if letter == key:
                 continue
@@ -86,9 +86,10 @@ class WindowsConflictChecker:
 
         return ""
 
-    def get_all_conflicts(self) -> Dict[str, List[str]]:
+    def get_all_conflicts(self) -> dict[str, list[str]]:
         conflicts = {}
         import string
+
         for letter in string.ascii_uppercase:
             for prefix in ["Ctrl+Alt", "Ctrl+Shift+Alt"]:
                 combo = f"{prefix}+{letter}"
@@ -99,8 +100,9 @@ class WindowsConflictChecker:
                     conflicts[combo].append(result.reason)
         return conflicts
 
-    def summary(self) -> Dict[str, int]:
+    def summary(self) -> dict[str, int]:
         import string
+
         total = 0
         safe = 0
         risky = 0

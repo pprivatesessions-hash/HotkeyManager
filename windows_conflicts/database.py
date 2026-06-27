@@ -1,7 +1,6 @@
 import logging
-from enum import Enum
-from typing import Set, Dict, List
 from dataclasses import dataclass
+from enum import Enum
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,7 @@ class WindowsConflictDB:
         self._risky_combos = self._init_risky_combos()
         self._app_specific = self._init_app_specific()
 
-    def _init_system_keys(self) -> Set[str]:
+    def _init_system_keys(self) -> set[str]:
         return {
             "Ctrl+Alt+Delete",
             "Ctrl+Shift+Esc",
@@ -46,7 +45,7 @@ class WindowsConflictDB:
             "Alt+PrintScreen",
         }
 
-    def _init_reserved_combos(self) -> Dict[str, str]:
+    def _init_reserved_combos(self) -> dict[str, str]:
         return {
             "Ctrl+C": "Копировать",
             "Ctrl+V": "Вставить",
@@ -98,7 +97,7 @@ class WindowsConflictDB:
             "PageDown": "Страницу вниз",
         }
 
-    def _init_risky_combos(self) -> Dict[str, str]:
+    def _init_risky_combos(self) -> dict[str, str]:
         return {
             "Ctrl+Alt+A": "Может конфликтовать с диспетчером задач",
             "Ctrl+Alt+B": "Может конфликтовать с Some software",
@@ -118,7 +117,7 @@ class WindowsConflictDB:
             "Ctrl+Alt+Z": "Может конфликтовать с NVIDIA",
         }
 
-    def _init_app_specific(self) -> Dict[str, Dict[str, str]]:
+    def _init_app_specific(self) -> dict[str, dict[str, str]]:
         return {
             "AutoCAD": {
                 "Ctrl+Z": "Отменить",
@@ -183,8 +182,8 @@ class WindowsConflictDB:
             reserved_by="",
         )
 
-    def get_safe_prefixes(self) -> List[str]:
+    def get_safe_prefixes(self) -> list[str]:
         return ["Ctrl+Alt", "Ctrl+Shift+Alt"]
 
-    def get_forbidden_combos(self) -> Set[str]:
+    def get_forbidden_combos(self) -> set[str]:
         return set(self._reserved_combos.keys()) | self._system_keys

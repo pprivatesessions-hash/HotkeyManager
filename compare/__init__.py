@@ -1,1 +1,1 @@
-from .comparator import HotkeyComparator, ComparisonResult, ChangedCommand
+from .comparator import ChangedCommand, ComparisonResult, HotkeyComparator

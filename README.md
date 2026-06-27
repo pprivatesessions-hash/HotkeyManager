@@ -14,6 +14,8 @@
 | 🔄 **Сравнение** | Анализ изменений между версиями |
 | ⚠️ **Конфликты** | Проверка запрещённых комбинаций Windows |
 | 📊 **Экспорт** | Excel, Markdown, JSON |
+| 🔄 **CI/CD** | Автоматические тесты при каждом коммите |
+| 🔍 **Качество** | mypy, ruff, black |
 
 ## 📦 Установка
 
@@ -151,6 +153,11 @@ HotkeyManager/
 ├── pdf_parser.py             # Парсинг PDF
 ├── analyzer.py               # Анализ команд
 ├── generator.py              # Генерация клавиш
+├── pyproject.toml            # Настройки black, ruff, mypy
+│
+├── .github/
+│   └── workflows/
+│       └── tests.yml         # CI/CD pipeline
 │
 ├── models/                   # Модели данных
 │   ├── command.py            # Command, RawCommand
@@ -300,6 +307,63 @@ pytest HotkeyManager/tests/ -v
   },
   "commands": [...]
 }
+```
+
+## 🔄 CI/CD
+
+Автоматическая проверка при каждом коммите:
+
+```yaml
+# .github/workflows/tests.yml
+- Black (форматирование)
+- Ruff (линтинг)
+- Mypy (проверка типов)
+- Pytest (тесты)
+```
+
+### Запуск локально
+
+```bash
+# Форматирование
+black .
+
+# Линтинг
+ruff check .
+
+# Проверка типов
+mypy --ignore-missing-imports HotkeyManager/
+
+# Тесты
+pytest HotkeyManager/tests/ -v
+```
+
+## 🔍 Качество кода
+
+### Инструменты
+
+| Инструмент | Назначение |
+|------------|------------|
+| **black** | Автоматическое форматирование |
+| **ruff** | Линтинг (замена flake8, isort) |
+| **mypy** | Проверка типов |
+| **pytest** | Тестирование |
+
+### Конфигурация
+
+Все настройки в `pyproject.toml`:
+
+```toml
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+select = ["E", "W", "F", "I", "B", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
 ```
 
 ## 🛠️ Технологии

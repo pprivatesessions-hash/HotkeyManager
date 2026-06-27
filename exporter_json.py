@@ -32,10 +32,12 @@ def export_json(result: AnalysisResult, output_path: str) -> str:
         if hotkey:
             if hotkey not in data["hotkeys"]:
                 data["hotkeys"][hotkey] = []
-            data["hotkeys"][hotkey].append({
-                "category": cmd.category,
-                "name": cmd.name,
-            })
+            data["hotkeys"][hotkey].append(
+                {
+                    "category": cmd.category,
+                    "name": cmd.name,
+                }
+            )
 
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:

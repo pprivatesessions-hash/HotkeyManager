@@ -1,6 +1,4 @@
 import logging
-from typing import List
-from pathlib import Path
 
 import pytesseract
 from PIL import Image
@@ -14,7 +12,7 @@ logger = logging.getLogger(__name__)
 class TesseractProvider(OCRProvider):
     def __init__(
         self,
-        languages: List[str] = None,
+        languages: list[str] = None,
         dpi: int = 300,
         preprocess: bool = True,
     ):
@@ -43,7 +41,7 @@ class TesseractProvider(OCRProvider):
         image = Image.open(file_path)
         return self.recognize(image)
 
-    def get_supported_languages(self) -> List[str]:
+    def get_supported_languages(self) -> list[str]:
         try:
             return pytesseract.get_languages()
         except Exception:

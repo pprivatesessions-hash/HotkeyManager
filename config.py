@@ -1,11 +1,10 @@
 import logging
-from pathlib import Path
-from typing import List, Dict, Optional
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import yaml
 
-from .models.category import DEFAULT_CATEGORIES, Category
+from .models.category import DEFAULT_CATEGORIES
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +22,7 @@ class StrategyConfig:
 @dataclass
 class OCRConfig:
     engine: str = "tesseract"
-    languages: List[str] = field(default_factory=lambda: ["rus", "eng"])
+    languages: list[str] = field(default_factory=lambda: ["rus", "eng"])
     dpi: int = 300
     preprocess: bool = True
 
@@ -37,18 +36,18 @@ class CacheConfig:
 
 @dataclass
 class HotkeyConfig:
-    prefix_combos: List[str] = field(default_factory=lambda: ["Ctrl+Alt", "Ctrl+Shift+Alt"])
-    exclude_keys: List[str] = field(default_factory=list)
-    category_weights: Dict[str, float] = field(default_factory=dict)
-    semantic_hints: Dict[str, str] = field(default_factory=dict)
-    command_keywords: Dict[str, str] = field(default_factory=dict)
-    keyboard_layout: Dict[str, str] = field(default_factory=dict)
+    prefix_combos: list[str] = field(default_factory=lambda: ["Ctrl+Alt", "Ctrl+Shift+Alt"])
+    exclude_keys: list[str] = field(default_factory=list)
+    category_weights: dict[str, float] = field(default_factory=dict)
+    semantic_hints: dict[str, str] = field(default_factory=dict)
+    command_keywords: dict[str, str] = field(default_factory=dict)
+    keyboard_layout: dict[str, str] = field(default_factory=dict)
     strategy: StrategyConfig = field(default_factory=StrategyConfig)
     ocr: OCRConfig = field(default_factory=OCRConfig)
     cache: CacheConfig = field(default_factory=CacheConfig)
 
 
-def load_config(config_path: Optional[str] = None) -> HotkeyConfig:
+def load_config(config_path: str | None = None) -> HotkeyConfig:
     path = Path(config_path) if config_path else CONFIG_FILE
 
     if not path.exists():
@@ -56,7 +55,7 @@ def load_config(config_path: Optional[str] = None) -> HotkeyConfig:
         return _default_config()
 
     try:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             data = yaml.safe_load(f)
     except Exception as e:
         logger.error(f"Ошибка чтения конфига: {e}")

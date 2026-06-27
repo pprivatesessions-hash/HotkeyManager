@@ -1,6 +1,5 @@
-import pytest
-from HotkeyManager.models.command import RawCommand, Command
 from HotkeyManager.analyzer import analyze_commands, find_conflicts
+from HotkeyManager.models.command import RawCommand
 
 
 class TestAnalyzer:

@@ -1,8 +1,6 @@
 import logging
-from typing import Tuple
 
-import numpy as np
-from PIL import Image, ImageFilter, ImageEnhance, ImageOps
+from PIL import Image, ImageEnhance, ImageFilter
 
 logger = logging.getLogger(__name__)
 
@@ -91,8 +89,8 @@ class ImagePreprocessor:
 
     def _correct_rotation(self, image: Image.Image) -> Image.Image:
         try:
-            from scipy import ndimage
             import numpy as np
+            from scipy import ndimage
 
             array = np.array(image)
             edges = np.gradient(array.astype(float))

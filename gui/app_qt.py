@@ -1,30 +1,44 @@
 import logging
-from typing import Optional
 from pathlib import Path
 
 try:
-    from PySide6.QtWidgets import (
-        QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-        QTableWidget, QTableWidgetItem, QHeaderView, QPushButton,
-        QLabel, QFileDialog, QMessageBox, QStatusBar, QMenuBar,
-        QMenu, QToolBar, QComboBox, QProgressBar
-    )
     from PySide6.QtCore import Qt, QThread, Signal
     from PySide6.QtGui import QAction, QColor, QFont, QIcon
+    from PySide6.QtWidgets import (
+        QApplication,
+        QComboBox,
+        QFileDialog,
+        QHBoxLayout,
+        QHeaderView,
+        QLabel,
+        QMainWindow,
+        QMenu,
+        QMenuBar,
+        QMessageBox,
+        QProgressBar,
+        QPushButton,
+        QStatusBar,
+        QTableWidget,
+        QTableWidgetItem,
+        QToolBar,
+        QVBoxLayout,
+        QWidget,
+    )
+
     HAS_PYSIDE6 = True
 except ImportError:
     HAS_PYSIDE6 = False
 
-from ..config import load_config, HotkeyConfig
-from ..pdf_parser import parse_pdf
-from ..analyzer import analyze_commands
-from ..generator import generate_hotkeys
-from ..exporter_excel import export_excel
-from ..exporter_md import export_markdown
-from ..exporter_json import export_json
-from ..models.analysis import AnalysisResult
 from ..ai.engine import AIEngine
+from ..analyzer import analyze_commands
 from ..compare.comparator import HotkeyComparator
+from ..config import HotkeyConfig, load_config
+from ..exporter_excel import export_excel
+from ..exporter_json import export_json
+from ..exporter_md import export_markdown
+from ..generator import generate_hotkeys
+from ..models.analysis import AnalysisResult
+from ..pdf_parser import parse_pdf
 from ..windows_conflicts.checker import WindowsConflictChecker
 
 logger = logging.getLogger(__name__)
@@ -79,16 +93,14 @@ class GenerateWorker(QThread):
 class QtHotkeyManagerApp(QMainWindow):
     def __init__(self):
         if not HAS_PYSIDE6:
-            raise ImportError(
-                "PySide6 не установлен. Установите: pip install PySide6"
-            )
+            raise ImportError("PySide6 не установлен. Установите: pip install PySide6")
 
         super().__init__()
         self.setWindowTitle("HotkeyManager — БАЗИС-Мебельщик")
         self.setGeometry(100, 100, 1200, 800)
 
         self.config = load_config()
-        self.result: Optional[AnalysisResult] = None
+        self.result: AnalysisResult | None = None
         self.checker = WindowsConflictChecker()
 
         self._setup_ui()
@@ -136,9 +148,9 @@ class QtHotkeyManagerApp(QMainWindow):
 
         self.table = QTableWidget()
         self.table.setColumnCount(5)
-        self.table.setHorizontalHeaderLabels([
-            "Категория", "Команда", "Текущая клавиша", "Новая клавиша", "Статус"
-        ])
+        self.table.setHorizontalHeaderLabels(
+            ["Категория", "Команда", "Текущая клавиша", "Новая клавиша", "Статус"]
+        )
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
@@ -356,6 +368,7 @@ class QtHotkeyManagerApp(QMainWindow):
 
 def run_qt_app():
     import sys
+
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     window = QtHotkeyManagerApp()

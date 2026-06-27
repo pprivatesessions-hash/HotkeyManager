@@ -1,5 +1,4 @@
-import pytest
-from HotkeyManager.pdf_parser import _is_category, _clean_category, _parse_command_line
+from HotkeyManager.pdf_parser import _clean_category, _is_category, _parse_command_line
 
 
 class TestParser:

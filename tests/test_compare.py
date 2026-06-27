@@ -1,6 +1,5 @@
-import pytest
+from HotkeyManager.compare.comparator import ChangeType, HotkeyComparator
 from HotkeyManager.models.command import Command
-from HotkeyManager.compare.comparator import HotkeyComparator, ChangeType
 
 
 class TestComparator:

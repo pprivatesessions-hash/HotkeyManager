@@ -1,9 +1,8 @@
 import hashlib
 import json
 import logging
-from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Optional
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +20,7 @@ class OCRCache:
     def _get_cache_path(self, key: str) -> Path:
         return self.cache_dir / f"{key}.json"
 
-    def get(self, pdf_path: str, page_num: int) -> Optional[str]:
+    def get(self, pdf_path: str, page_num: int) -> str | None:
         key = self._get_key(pdf_path, page_num)
         cache_path = self._get_cache_path(key)
 
@@ -29,7 +28,7 @@ class OCRCache:
             return None
 
         try:
-            with open(cache_path, "r", encoding="utf-8") as f:
+            with open(cache_path, encoding="utf-8") as f:
                 data = json.load(f)
 
             cached_time = datetime.fromisoformat(data["timestamp"])

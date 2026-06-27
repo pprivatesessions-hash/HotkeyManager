@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Dict
 
 
 @dataclass
@@ -14,7 +13,7 @@ class Category:
         return any(kw.lower() in lower for kw in self.keywords)
 
 
-DEFAULT_CATEGORIES: Dict[str, Category] = {
+DEFAULT_CATEGORIES: dict[str, Category] = {
     "Блоки": Category(
         name="Блоки",
         weight=1.0,

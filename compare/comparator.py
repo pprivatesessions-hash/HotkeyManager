@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass, field
-from typing import List, Dict, Optional
 from enum import Enum
 
 from ..models.command import Command
@@ -21,25 +20,25 @@ class ChangedCommand:
     command: str
     category: str
     change_type: ChangeType
-    old_value: Optional[str] = None
-    new_value: Optional[str] = None
+    old_value: str | None = None
+    new_value: str | None = None
 
 
 @dataclass
 class ComparisonResult:
-    old_commands: List[Command] = field(default_factory=list)
-    new_commands: List[Command] = field(default_factory=list)
-    added: List[ChangedCommand] = field(default_factory=list)
-    removed: List[ChangedCommand] = field(default_factory=list)
-    changed: List[ChangedCommand] = field(default_factory=list)
-    unchanged: List[Command] = field(default_factory=list)
+    old_commands: list[Command] = field(default_factory=list)
+    new_commands: list[Command] = field(default_factory=list)
+    added: list[ChangedCommand] = field(default_factory=list)
+    removed: list[ChangedCommand] = field(default_factory=list)
+    changed: list[ChangedCommand] = field(default_factory=list)
+    unchanged: list[Command] = field(default_factory=list)
 
     @property
     def has_changes(self) -> bool:
         return bool(self.added or self.removed or self.changed)
 
     @property
-    def summary(self) -> Dict[str, int]:
+    def summary(self) -> dict[str, int]:
         return {
             "old_total": len(self.old_commands),
             "new_total": len(self.new_commands),
@@ -53,8 +52,8 @@ class ComparisonResult:
 class HotkeyComparator:
     def compare(
         self,
-        old_commands: List[Command],
-        new_commands: List[Command],
+        old_commands: list[Command],
+        new_commands: list[Command],
     ) -> ComparisonResult:
         logger.info(f"Сравнение: {len(old_commands)}旧 → {len(new_commands)}新")
 
@@ -68,12 +67,14 @@ class HotkeyComparator:
 
         for name, new_cmd in new_map.items():
             if name not in old_map:
-                result.added.append(ChangedCommand(
-                    command=name,
-                    category=new_cmd.category,
-                    change_type=ChangeType.NEW,
-                    new_value=new_cmd.current_hotkey,
-                ))
+                result.added.append(
+                    ChangedCommand(
+                        command=name,
+                        category=new_cmd.category,
+                        change_type=ChangeType.NEW,
+                        new_value=new_cmd.current_hotkey,
+                    )
+                )
             else:
                 old_cmd = old_map[name]
                 changes = self._compare_commands(old_cmd, new_cmd)
@@ -84,12 +85,14 @@ class HotkeyComparator:
 
         for name, old_cmd in old_map.items():
             if name not in new_map:
-                result.removed.append(ChangedCommand(
-                    command=name,
-                    category=old_cmd.category,
-                    change_type=ChangeType.REMOVED,
-                    old_value=old_cmd.current_hotkey,
-                ))
+                result.removed.append(
+                    ChangedCommand(
+                        command=name,
+                        category=old_cmd.category,
+                        change_type=ChangeType.REMOVED,
+                        old_value=old_cmd.current_hotkey,
+                    )
+                )
 
         logger.info(
             f"Результат: +{len(result.added)} -{len(result.removed)} "
@@ -102,26 +105,30 @@ class HotkeyComparator:
         self,
         old: Command,
         new: Command,
-    ) -> List[ChangedCommand]:
+    ) -> list[ChangedCommand]:
         changes = []
 
         if old.current_hotkey != new.current_hotkey:
-            changes.append(ChangedCommand(
-                command=new.name,
-                category=new.category,
-                change_type=ChangeType.HOTKEY_CHANGED,
-                old_value=old.current_hotkey,
-                new_value=new.current_hotkey,
-            ))
+            changes.append(
+                ChangedCommand(
+                    command=new.name,
+                    category=new.category,
+                    change_type=ChangeType.HOTKEY_CHANGED,
+                    old_value=old.current_hotkey,
+                    new_value=new.current_hotkey,
+                )
+            )
 
         if old.category != new.category:
-            changes.append(ChangedCommand(
-                command=new.name,
-                category=new.category,
-                change_type=ChangeType.CATEGORY_CHANGED,
-                old_value=old.category,
-                new_value=new.category,
-            ))
+            changes.append(
+                ChangedCommand(
+                    command=new.name,
+                    category=new.category,
+                    change_type=ChangeType.CATEGORY_CHANGED,
+                    old_value=old.category,
+                    new_value=new.category,
+                )
+            )
 
         return changes
 
@@ -131,7 +138,7 @@ class HotkeyComparator:
         lines.append("")
 
         summary = result.summary
-        lines.append(f"## Итого")
+        lines.append("## Итого")
         lines.append(f"- Было команд: {summary['old_total']}")
         lines.append(f"- Стало команд: {summary['new_total']}")
         lines.append(f"- Добавлено: {summary['added']}")
@@ -168,6 +175,7 @@ class HotkeyComparator:
             lines.append("")
 
         from pathlib import Path
+
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, "w", encoding="utf-8") as f:
             f.write("\n".join(lines))

@@ -1,8 +1,6 @@
-import pytest
-from HotkeyManager.models.command import RawCommand, Command
-from HotkeyManager.models.analysis import AnalysisResult
-from HotkeyManager.generator import generate_hotkeys, _extract_semantic_hint
 from HotkeyManager.config import HotkeyConfig
+from HotkeyManager.generator import _extract_semantic_hint, generate_hotkeys
+from HotkeyManager.models.command import RawCommand
 
 
 class TestGenerator:
@@ -24,6 +22,7 @@ class TestGenerator:
         ]
 
         from HotkeyManager.analyzer import analyze_commands
+
         result = analyze_commands(raw_commands)
         result = generate_hotkeys(result, self.config)
 
@@ -37,6 +36,7 @@ class TestGenerator:
         ]
 
         from HotkeyManager.analyzer import analyze_commands
+
         result = analyze_commands(raw_commands)
         result = generate_hotkeys(result, self.config)
 
@@ -45,11 +45,11 @@ class TestGenerator:
 
     def test_generate_hotkeys_no_duplicates(self):
         raw_commands = [
-            RawCommand(category="Блоки", name=f"Команда{i}", hotkey=None, page=1)
-            for i in range(10)
+            RawCommand(category="Блоки", name=f"Команда{i}", hotkey=None, page=1) for i in range(10)
         ]
 
         from HotkeyManager.analyzer import analyze_commands
+
         result = analyze_commands(raw_commands)
         result = generate_hotkeys(result, self.config)
 

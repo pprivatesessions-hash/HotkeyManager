@@ -1,8 +1,7 @@
-import pytest
-from HotkeyManager.models.command import RawCommand
-from HotkeyManager.analyzer import analyze_commands
 from HotkeyManager.ai.engine import AIEngine
+from HotkeyManager.analyzer import analyze_commands
 from HotkeyManager.config import HotkeyConfig, load_config
+from HotkeyManager.models.command import RawCommand
 
 
 class TestAIEngine:
@@ -55,8 +54,7 @@ class TestAIEngine:
 
     def test_ai_no_duplicates(self):
         raw_commands = [
-            RawCommand(category="Блоки", name=f"Команда{i}", hotkey=None, page=1)
-            for i in range(5)
+            RawCommand(category="Блоки", name=f"Команда{i}", hotkey=None, page=1) for i in range(5)
         ]
         result = analyze_commands(raw_commands)
         result = self.engine.generate(result)

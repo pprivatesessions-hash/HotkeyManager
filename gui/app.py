@@ -1,19 +1,18 @@
 import logging
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
-from typing import Optional
 from pathlib import Path
+from tkinter import filedialog, messagebox, ttk
 
-from ..config import load_config, HotkeyConfig
-from ..pdf_parser import parse_pdf
-from ..analyzer import analyze_commands
-from ..generator import generate_hotkeys
-from ..exporter_excel import export_excel
-from ..exporter_md import export_markdown
-from ..exporter_json import export_json
-from ..models.analysis import AnalysisResult
 from ..ai.engine import AIEngine
+from ..analyzer import analyze_commands
 from ..compare.comparator import HotkeyComparator
+from ..config import load_config
+from ..exporter_excel import export_excel
+from ..exporter_json import export_json
+from ..exporter_md import export_markdown
+from ..generator import generate_hotkeys
+from ..models.analysis import AnalysisResult
+from ..pdf_parser import parse_pdf
 from ..windows_conflicts.checker import WindowsConflictChecker
 
 logger = logging.getLogger(__name__)
@@ -27,7 +26,7 @@ class HotkeyManagerApp:
         self.root.minsize(800, 600)
 
         self.config = load_config()
-        self.result: Optional[AnalysisResult] = None
+        self.result: AnalysisResult | None = None
         self.checker = WindowsConflictChecker()
 
         self._setup_ui()
@@ -60,15 +59,21 @@ class HotkeyManagerApp:
         self._pdf_label = ttk.Label(top_frame, text="PDF не загружен")
         self._pdf_label.pack(side=tk.LEFT, padx=(0, 10))
 
-        ttk.Button(top_frame, text="Загрузить PDF", command=self._open_pdf).pack(side=tk.LEFT, padx=5)
-        ttk.Button(top_frame, text="Генерировать", command=self._generate).pack(side=tk.LEFT, padx=5)
+        ttk.Button(top_frame, text="Загрузить PDF", command=self._open_pdf).pack(
+            side=tk.LEFT, padx=5
+        )
+        ttk.Button(top_frame, text="Генерировать", command=self._generate).pack(
+            side=tk.LEFT, padx=5
+        )
         ttk.Button(top_frame, text="AI режим", command=self._generate_ai).pack(side=tk.LEFT, padx=5)
 
         self._status_label = ttk.Label(top_frame, text="")
         self._status_label.pack(side=tk.RIGHT)
 
         columns = ("category", "name", "current", "suggested", "status")
-        self._tree = ttk.Treeview(main_frame, columns=columns, show="headings", selectmode="extended")
+        self._tree = ttk.Treeview(
+            main_frame, columns=columns, show="headings", selectmode="extended"
+        )
 
         self._tree.heading("category", text="Категория")
         self._tree.heading("name", text="Команда")
@@ -167,20 +172,25 @@ class HotkeyManagerApp:
 
             tag = cmd.status
 
-            self._tree.insert("", tk.END, values=(
-                cmd.category,
-                cmd.name,
-                current,
-                suggested,
-                status,
-            ), tags=(tag,))
+            self._tree.insert(
+                "",
+                tk.END,
+                values=(
+                    cmd.category,
+                    cmd.name,
+                    current,
+                    suggested,
+                    status,
+                ),
+                tags=(tag,),
+            )
 
         summary = self.result.summary()
         self._stats_label.config(
             text=f"Команд: {summary['total']} | "
-                 f"Назначено: {summary['assigned']} | "
-                 f"Свободно: {summary['free']} | "
-                 f"Дубликатов: {summary['duplicates']}"
+            f"Назначено: {summary['assigned']} | "
+            f"Свободно: {summary['free']} | "
+            f"Дубликатов: {summary['duplicates']}"
         )
 
     def _export_excel(self):

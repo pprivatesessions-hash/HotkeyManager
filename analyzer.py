@@ -1,18 +1,17 @@
 import logging
-from typing import List, Dict, Set
 from collections import defaultdict
 
-from .models.command import RawCommand, Command
 from .models.analysis import AnalysisResult
+from .models.command import Command, RawCommand
 
 logger = logging.getLogger(__name__)
 
 
-def analyze_commands(raw_commands: List[RawCommand]) -> AnalysisResult:
+def analyze_commands(raw_commands: list[RawCommand]) -> AnalysisResult:
     logger.info(f"Анализ {len(raw_commands)} команд")
 
     result = AnalysisResult()
-    hotkey_to_commands: Dict[str, List[Command]] = defaultdict(list)
+    hotkey_to_commands: dict[str, list[Command]] = defaultdict(list)
 
     for raw in raw_commands:
         cmd = Command(
@@ -31,9 +30,7 @@ def analyze_commands(raw_commands: List[RawCommand]) -> AnalysisResult:
             result.duplicates[hotkey] = cmds
             for cmd in cmds:
                 cmd.status = "duplicate"
-                cmd.conflict_with = ", ".join(
-                    c.name for c in cmds if c != cmd
-                )
+                cmd.conflict_with = ", ".join(c.name for c in cmds if c != cmd)
             logger.warning(f"Дубликат: {hotkey} -> {[c.name for c in cmds]}")
 
     for cmd in result.commands:
@@ -54,5 +51,5 @@ def analyze_commands(raw_commands: List[RawCommand]) -> AnalysisResult:
     return result
 
 
-def find_conflicts(hotkey: str, used_hotkeys: Set[str]) -> bool:
+def find_conflicts(hotkey: str, used_hotkeys: set[str]) -> bool:
     return hotkey in used_hotkeys

@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from openpyxl import Workbook
-from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
 from .models.analysis import AnalysisResult
 
@@ -35,7 +35,9 @@ def export_excel(result: AnalysisResult, output_path: str) -> str:
 
     status_colors = {
         "assigned": PatternFill(start_color="C6EFCE", end_color="C6EFCE", fill_type="solid"),
-        "needs_assignment": PatternFill(start_color="FFEB9C", end_color="FFEB9C", fill_type="solid"),
+        "needs_assignment": PatternFill(
+            start_color="FFEB9C", end_color="FFEB9C", fill_type="solid"
+        ),
         "duplicate": PatternFill(start_color="FFC7CE", end_color="FFC7CE", fill_type="solid"),
     }
 
@@ -51,7 +53,9 @@ def export_excel(result: AnalysisResult, output_path: str) -> str:
         ws.cell(row=row_idx, column=3, value=cmd.current_hotkey or "—").border = thin_border
         ws.cell(row=row_idx, column=4, value=cmd.suggested_hotkey or "—").border = thin_border
 
-        status_cell = ws.cell(row=row_idx, column=5, value=status_labels.get(cmd.status, cmd.status))
+        status_cell = ws.cell(
+            row=row_idx, column=5, value=status_labels.get(cmd.status, cmd.status)
+        )
         status_cell.border = thin_border
         if cmd.status in status_colors:
             status_cell.fill = status_colors[cmd.status]

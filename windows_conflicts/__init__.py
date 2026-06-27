@@ -1,2 +1,2 @@
-from .database import WindowsConflictDB, ConflictLevel
 from .checker import WindowsConflictChecker
+from .database import ConflictLevel, WindowsConflictDB

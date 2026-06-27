@@ -1,12 +1,11 @@
-from .pdf_parser import parse_pdf
-from .analyzer import analyze_commands
-from .generator import generate_hotkeys
-from .exporter_excel import export_excel
-from .exporter_md import export_markdown
-from .exporter_json import export_json
-from .config import HotkeyConfig, load_config, DEFAULT_CONFIG
-
-from .models import Command, RawCommand, Category, Hotkey, AnalysisResult
-from .windows_conflicts import WindowsConflictDB, WindowsConflictChecker, ConflictLevel
-from .compare import HotkeyComparator, ComparisonResult
 from .ai import AIEngine
+from .analyzer import analyze_commands
+from .compare import ComparisonResult, HotkeyComparator
+from .config import DEFAULT_CONFIG, HotkeyConfig, load_config
+from .exporter_excel import export_excel
+from .exporter_json import export_json
+from .exporter_md import export_markdown
+from .generator import generate_hotkeys
+from .models import AnalysisResult, Category, Command, Hotkey, RawCommand
+from .pdf_parser import parse_pdf
+from .windows_conflicts import ConflictLevel, WindowsConflictChecker, WindowsConflictDB

@@ -1,11 +1,9 @@
 import logging
 import string
-from typing import List, Set, Optional, Dict
-from itertools import product
 
-from .models.command import Command
+from .config import DEFAULT_CONFIG, HotkeyConfig
 from .models.analysis import AnalysisResult
-from .config import HotkeyConfig, DEFAULT_CONFIG
+from .models.command import Command
 
 logger = logging.getLogger(__name__)
 
@@ -64,9 +62,9 @@ def generate_hotkeys(
 
 def _find_best_hotkey(
     cmd: Command,
-    used: Set[str],
+    used: set[str],
     config: HotkeyConfig,
-) -> Optional[str]:
+) -> str | None:
     if config.strategy.use_semantic:
         semantic_hotkey = _try_semantic(cmd, used, config)
         if semantic_hotkey:
@@ -82,9 +80,9 @@ def _find_best_hotkey(
 
 def _try_semantic(
     cmd: Command,
-    used: Set[str],
+    used: set[str],
     config: HotkeyConfig,
-) -> Optional[str]:
+) -> str | None:
     hint = config.semantic_hints.get(cmd.name)
     if not hint:
         hint = _extract_semantic_hint(cmd.name)
@@ -103,7 +101,7 @@ def _try_semantic(
     return None
 
 
-def _extract_semantic_hint(name: str) -> Optional[str]:
+def _extract_semantic_hint(name: str) -> str | None:
     russian_to_latin = {
         "Разрушить": "D",
         "Вставить": "V",
@@ -150,9 +148,9 @@ def _extract_semantic_hint(name: str) -> Optional[str]:
 
 def _try_category_based(
     cmd: Command,
-    used: Set[str],
+    used: set[str],
     config: HotkeyConfig,
-) -> Optional[str]:
+) -> str | None:
     category_keys = {
         "Блоки": ["B", "G", "U"],
         "Правка": ["C", "V", "X", "Z", "Y"],
@@ -173,7 +171,7 @@ def _try_category_based(
     return None
 
 
-def _next_free(used: Set[str], config: HotkeyConfig) -> Optional[str]:
+def _next_free(used: set[str], config: HotkeyConfig) -> str | None:
     letters = list(string.ascii_uppercase)
 
     for prefix in config.prefix_combos:

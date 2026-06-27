@@ -1,11 +1,10 @@
 import logging
 import string
-from typing import List, Set, Dict, Optional, Tuple
 from dataclasses import dataclass
 
-from ..models.command import Command
+from ..config import DEFAULT_CONFIG, HotkeyConfig
 from ..models.analysis import AnalysisResult
-from ..config import HotkeyConfig, DEFAULT_CONFIG
+from ..models.command import Command
 from ..windows_conflicts.checker import WindowsConflictChecker
 
 logger = logging.getLogger(__name__)
@@ -23,7 +22,7 @@ class AIEngine:
     def __init__(self, config: HotkeyConfig = None):
         self.config = config or DEFAULT_CONFIG
         self.checker = WindowsConflictChecker()
-        self._used: Set[str] = set()
+        self._used: set[str] = set()
 
         self.command_keywords = self.config.command_keywords
         self.keyboard_layout = self.config.keyboard_layout
@@ -76,7 +75,7 @@ class AIEngine:
         logger.info("AI генерация завершена")
         return result
 
-    def _analyze_command(self, cmd: Command) -> Optional[AIResult]:
+    def _analyze_command(self, cmd: Command) -> AIResult | None:
         key, confidence, reason = self._extract_key(cmd.name)
 
         if not key:
@@ -89,7 +88,7 @@ class AIEngine:
             reason=reason,
         )
 
-    def _extract_key(self, name: str) -> Tuple[Optional[str], float, str]:
+    def _extract_key(self, name: str) -> tuple[str | None, float, str]:
         lower = name.lower()
 
         for keyword, key in self.command_keywords.items():
@@ -120,7 +119,7 @@ class AIEngine:
 
         return None, 0.0, ""
 
-    def _find_fallback(self, preferred_key: str) -> Optional[str]:
+    def _find_fallback(self, preferred_key: str) -> str | None:
         import string
 
         key_order = [preferred_key]

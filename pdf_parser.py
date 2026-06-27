@@ -1,15 +1,14 @@
 import logging
 import re
 from pathlib import Path
-from typing import List, Optional
 
 import fitz
 
+from .config import DEFAULT_CONFIG, HotkeyConfig
 from .models.command import RawCommand
 from .ocr.base import OCRProvider
-from .ocr.tesseract_provider import TesseractProvider
 from .ocr.cache import OCRCache
-from .config import HotkeyConfig, DEFAULT_CONFIG
+from .ocr.tesseract_provider import TesseractProvider
 
 logger = logging.getLogger(__name__)
 
@@ -19,17 +18,21 @@ def parse_pdf(
     config: HotkeyConfig = None,
     ocr_provider: OCRProvider = None,
     use_cache: bool = True,
-) -> List[RawCommand]:
+) -> list[RawCommand]:
     config = config or DEFAULT_CONFIG
     ocr_provider = ocr_provider or TesseractProvider(
         languages=config.ocr.languages,
         dpi=config.ocr.dpi,
         preprocess=config.ocr.preprocess,
     )
-    cache = OCRCache(
-        cache_dir=config.cache.directory,
-        max_age_hours=config.cache.max_age,
-    ) if use_cache and config.cache.enabled else None
+    cache = (
+        OCRCache(
+            cache_dir=config.cache.directory,
+            max_age_hours=config.cache.max_age,
+        )
+        if use_cache and config.cache.enabled
+        else None
+    )
 
     path = Path(pdf_path)
     if not path.exists():
@@ -50,6 +53,7 @@ def parse_pdf(
 
         pix = page.get_pixmap(dpi=config.ocr.dpi)
         from PIL import Image
+
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
 
         text = ocr_provider.recognize(img)
@@ -68,7 +72,7 @@ def parse_pdf(
     return commands
 
 
-def _extract_commands(pages_text: List[str]) -> List[RawCommand]:
+def _extract_commands(pages_text: list[str]) -> list[RawCommand]:
     commands = []
 
     for page_num, text in enumerate(pages_text, 1):
@@ -93,10 +97,24 @@ def _extract_commands(pages_text: List[str]) -> List[RawCommand]:
 
 def _is_category(line: str) -> bool:
     category_keywords = [
-        "блок", "правка", "вид", "рисование", "размер",
-        "файл", "сервис", "окно", "справка", "настройк",
-        "модель", "конструкц", "материал", "анализ",
-        "сборк", "спецификац", "отчет", "печать",
+        "блок",
+        "правка",
+        "вид",
+        "рисование",
+        "размер",
+        "файл",
+        "сервис",
+        "окно",
+        "справка",
+        "настройк",
+        "модель",
+        "конструкц",
+        "материал",
+        "анализ",
+        "сборк",
+        "спецификац",
+        "отчет",
+        "печать",
     ]
     lower = line.lower()
     return any(kw in lower for kw in category_keywords) and len(line) < 60
@@ -107,8 +125,8 @@ def _clean_category(line: str) -> str:
     return line.strip()
 
 
-def _parse_command_line(line: str, category: str, page: int) -> Optional[RawCommand]:
-    hotkey_pattern = r'(Ctrl\+[\w]+|Alt\+[\w]+|Shift\+[\w]+|F\d+)'
+def _parse_command_line(line: str, category: str, page: int) -> RawCommand | None:
+    hotkey_pattern = r"(Ctrl\+[\w]+|Alt\+[\w]+|Shift\+[\w]+|F\d+)"
     match = re.search(hotkey_pattern, line)
 
     hotkey = None
@@ -116,7 +134,7 @@ def _parse_command_line(line: str, category: str, page: int) -> Optional[RawComm
 
     if match:
         hotkey = match.group(0)
-        name = line[:match.start()].strip()
+        name = line[: match.start()].strip()
     else:
         name = line.strip()
 
