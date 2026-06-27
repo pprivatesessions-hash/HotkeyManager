@@ -9,7 +9,7 @@ class TestParser:
         assert _is_category("Правка") is True
 
     def test_is_category_not_category(self):
-        assert _is_category("Выделить все объекты") is False
+        assert _is_category("Выделить все объекты на текущем слое") is False
 
     def test_clean_category_with_colon(self):
         assert _clean_category("Блоки:") == "Блоки"

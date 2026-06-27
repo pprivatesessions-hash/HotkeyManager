@@ -74,6 +74,7 @@ def parse_pdf(
 
 def _extract_commands(pages_text: list[str]) -> list[RawCommand]:
     commands = []
+    categories_found: list[str] = []
 
     for page_num, text in enumerate(pages_text, 1):
         lines = text.split("\n")
@@ -86,28 +87,45 @@ def _extract_commands(pages_text: list[str]) -> list[RawCommand]:
 
             if _is_category(line):
                 current_category = _clean_category(line)
+                if current_category not in categories_found:
+                    categories_found.append(current_category)
                 continue
 
             parsed = _parse_command_line(line, current_category, page_num)
             if parsed:
                 commands.append(parsed)
 
+    if not commands and categories_found:
+        for cat in categories_found:
+            commands.append(RawCommand(
+                category=cat,
+                name=cat,
+                hotkey=None,
+                page=1,
+            ))
+
     return commands
 
 
 def _is_category(line: str) -> bool:
-    category_keywords = [
-        "блок",
+    if len(line) > 60:
+        return False
+
+    if re.search(r"(Ctrl\+|Alt\+|Shift\+|F\d+)", line):
+        return False
+
+    known_categories = [
+        "блок", "блоки",
         "правка",
-        "вид",
+        "вид", "вид 3d",
         "рисование",
-        "размер",
+        "размер", "размеры",
         "файл",
         "сервис",
-        "окно",
+        "окно", "окна",
         "справка",
         "настройк",
-        "модель",
+        "модель", "моделирование",
         "конструкц",
         "материал",
         "анализ",
@@ -115,9 +133,57 @@ def _is_category(line: str) -> bool:
         "спецификац",
         "отчет",
         "печать",
+        "выделение",
+        "группировка", "группировка",
+        "директивы",
+        "изделие",
+        "измерить",
+        "мебель",
+        "операции",
+        "оформить",
+        "править",
+        "разрушить",
+        "скрипты",
+        "строить",
+        "удаление",
+        "управление курсором",
+        "пользовательские скрипты",
+        "экструзия",
+        "торцевание",
+        "раскрой",
+        "создание",
+        "редактирование",
+        "преобразование",
+        "вставка",
+        "копирование",
+        "перенос",
+        "поворот",
+        "масштаб",
+        "отображение",
+        "скрытие",
+        "слои",
+        "типы",
+        "свойства",
+        "параметры",
+        "спецификация",
+        "отчеты",
+        "печать",
+        "экспорт",
+        "импорт",
+        "проверка",
+        "валидация",
     ]
-    lower = line.lower()
-    return any(kw in lower for kw in category_keywords) and len(line) < 60
+
+    lower = line.lower().strip()
+
+    for cat in known_categories:
+        if lower == cat or lower.startswith(cat):
+            return True
+
+    if len(line) < 30 and not re.search(r"[а-яА-Яa-zA-Z]{10,}", line):
+        return True
+
+    return False
 
 
 def _clean_category(line: str) -> str:
