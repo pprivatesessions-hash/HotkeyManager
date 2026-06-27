@@ -130,7 +130,7 @@ class HotkeyManagerApp:
         if col_id == "category":
             self._add_category_from_file()
         elif col_id == "commands":
-            self._add_commands_to_category()
+            self._add_commands_from_file()
         elif col_id == "hotkeys":
             self._status_label.config(text="Клавиши назначаются автоматически при генерации")
 
@@ -181,39 +181,9 @@ class HotkeyManagerApp:
         except Exception as e:
             messagebox.showerror("Ошибка", f"Ошибка импорта:\n{e}")
 
-    def _add_commands_to_category(self):
-        if not self._categories:
-            messagebox.showinfo("Информация", "Сначала добавьте категории через заголовок 'Категория'")
-            return
-
-        select_window = tk.Toplevel(self.root)
-        select_window.title("Выберите категорию")
-        select_window.geometry("350x250")
-        select_window.transient(self.root)
-        select_window.grab_set()
-
-        ttk.Label(select_window, text="Выберите категорию для добавления команд:", padding=10).pack()
-
-        listbox = tk.Listbox(select_window, font=("Arial", 11))
-        listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
-
-        for cat in self._categories:
-            listbox.insert(tk.END, f"{cat.name} ({len(cat.commands)} команд)")
-
-        def on_select():
-            selection = listbox.curselection()
-            if not selection:
-                return
-            idx = selection[0]
-            cat_name = self._categories[idx].name
-            select_window.destroy()
-            self._import_commands_to(cat_name)
-
-        ttk.Button(select_window, text="Выбрать", command=on_select).pack(pady=10)
-
-    def _import_commands_to(self, category_name: str):
+    def _add_commands_from_file(self):
         path = filedialog.askopenfilename(
-            title=f"Выберите файл для категории: {category_name}",
+            title="Выберите файл с командами",
             filetypes=[
                 ("Все поддерживаемые", "*.pdf *.jpg *.jpeg *.png *.bmp *.tiff"),
                 ("PDF files", "*.pdf"),
@@ -226,24 +196,32 @@ class HotkeyManagerApp:
         try:
             raw_commands = self._parse_file(path)
 
-            for block in self._categories:
-                if block.name == category_name:
-                    existing_names = {c.name for c in block.commands}
-                    added = 0
-                    for cmd in raw_commands:
-                        if cmd.name not in existing_names:
-                            block.commands.append(cmd)
-                            existing_names.add(cmd.name)
-                            added += 1
-                    self._status_label.config(
-                        text=f"В '{category_name}' добавлено {added} команд"
-                    )
-                    break
+            existing_cat_names = {c.name for c in self._categories}
+            added_commands = 0
+
+            for cmd in raw_commands:
+                cat_name = cmd.category or "Без категории"
+
+                if cat_name not in existing_cat_names:
+                    block = CategoryBlock(cat_name)
+                    block.commands = [cmd]
+                    self._categories.append(block)
+                    existing_cat_names.add(cat_name)
+                    added_commands += 1
+                else:
+                    for block in self._categories:
+                        if block.name == cat_name:
+                            existing_cmd_names = {c.name for c in block.commands}
+                            if cmd.name not in existing_cmd_names:
+                                block.commands.append(cmd)
+                                added_commands += 1
+                            break
 
             self._generated = False
-            self._btn_generate.config(state=tk.NORMAL)
+            self._btn_generate.config(state=tk.NORMAL if self._categories else tk.DISABLED)
             self._btn_save.config(state=tk.DISABLED)
             self._rebuild_table()
+            self._status_label.config(text=f"Добавлено команд: {added_commands}")
         except Exception as e:
             messagebox.showerror("Ошибка", f"Ошибка импорта:\n{e}")
 
