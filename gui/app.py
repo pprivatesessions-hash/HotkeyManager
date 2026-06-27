@@ -97,7 +97,7 @@ class HotkeyManagerApp:
         self._header_frame = ttk.Frame(self._table_frame)
         self._header_frame.pack(fill=tk.X)
 
-        headers = [("category", "Категория", 200), ("commands", "Команда", 350), ("hotkeys", "Горячие клавиши", 200)]
+        headers = [("category", "Категория", 200), ("commands", "Команда", 350), ("clear", "Очистить", 200)]
         for col_id, text, width in headers:
             btn = tk.Button(
                 self._header_frame,
@@ -131,8 +131,24 @@ class HotkeyManagerApp:
             self._add_category_from_file()
         elif col_id == "commands":
             self._select_category_then_import()
-        elif col_id == "hotkeys":
-            self._status_label.config(text="Клавиши назначаются автоматически при генерации")
+        elif col_id == "clear":
+            self._clear_all_hotkeys()
+
+    def _clear_all_hotkeys(self):
+        if not self._categories:
+            return
+
+        count = 0
+        for block in self._categories:
+            for cmd in block.commands:
+                if cmd.hotkey:
+                    cmd.hotkey = None
+                    count += 1
+
+        self._generated = False
+        self._btn_save.config(state=tk.DISABLED)
+        self._rebuild_table()
+        self._status_label.config(text=f"Очищено клавиш: {count}")
 
     def _select_category_then_import(self):
         if not self._categories:
