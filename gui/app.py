@@ -339,15 +339,32 @@ class HotkeyManagerApp:
             return
 
         all_commands = []
+        used_hotkeys = set()
+
         for block in self._categories:
             for cmd in block.commands:
-                all_commands.append(Command(
+                command = Command(
                     category=block.name,
                     name=cmd.name,
                     current_hotkey=cmd.hotkey,
-                ))
+                )
+                all_commands.append(command)
+                if cmd.hotkey:
+                    used_hotkeys.add(cmd.hotkey)
 
-        self.result = AnalysisResult(commands=all_commands)
+        self.result = AnalysisResult(
+            commands=all_commands,
+            used_hotkeys=used_hotkeys,
+        )
+
+        for cmd in all_commands:
+            if cmd.current_hotkey:
+                cmd.status = "assigned"
+                self.result.assigned.append(cmd)
+            else:
+                cmd.status = "needs_assignment"
+                self.result.free.append(cmd)
+
         self.result = generate_hotkeys(self.result, self.config)
 
         hotkey_map: dict[str, str] = {}
@@ -365,7 +382,7 @@ class HotkeyManagerApp:
         self._generated = True
         self._btn_save.config(state=tk.NORMAL)
         self._rebuild_table()
-        self._status_label.config(text="Генерация завершена")
+        self._status_label.config(text=f"Генерация завершена: назначено {len(self.result.free)} клавиш")
 
     def _save(self):
         if not self.result:
