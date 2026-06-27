@@ -108,13 +108,16 @@ def _extract_commands(pages_text: list[str]) -> list[RawCommand]:
 
 
 def _is_category(line: str) -> bool:
-    if len(line) > 60:
+    if len(line) > 40:
         return False
 
-    if re.search(r"(Ctrl\+|Alt\+|Shift\+|F\d+)", line):
+    if re.search(r"(Ctrl\+|Alt\+|Shift\+|F\d+|\[.*\])", line):
         return False
 
-    known_categories = [
+    if re.search(r"[-–—=]", line):
+        return False
+
+    exact_categories = {
         "блок", "блоки",
         "правка",
         "вид", "вид 3d",
@@ -124,23 +127,23 @@ def _is_category(line: str) -> bool:
         "сервис",
         "окно", "окна",
         "справка",
-        "настройк",
+        "настройк", "настройки",
         "модель", "моделирование",
-        "конструкц",
-        "материал",
+        "конструкц", "конструкция",
+        "материал", "материалы",
         "анализ",
-        "сборк",
-        "спецификац",
-        "отчет",
+        "сборк", "сборка",
+        "спецификац", "спецификация",
+        "отчет", "отчеты",
         "печать",
         "выделение",
-        "группировка", "группировка",
+        "группировка",
         "директивы",
-        "изделие",
-        "измерить",
+        "изделие", "изделия",
+        "измерить", "измерения",
         "мебель",
         "операции",
-        "оформить",
+        "оформить", "оформление",
         "править",
         "разрушить",
         "скрипты",
@@ -165,23 +168,16 @@ def _is_category(line: str) -> bool:
         "типы",
         "свойства",
         "параметры",
-        "спецификация",
-        "отчеты",
-        "печать",
+        "проверка",
         "экспорт",
         "импорт",
-        "проверка",
-        "валидация",
-    ]
+    }
 
     lower = line.lower().strip()
 
-    for cat in known_categories:
-        if lower == cat or lower.startswith(cat):
+    for cat in exact_categories:
+        if lower == cat:
             return True
-
-    if len(line) < 30 and not re.search(r"[а-яА-Яa-zA-Z]{10,}", line):
-        return True
 
     return False
 
