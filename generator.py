@@ -4,6 +4,7 @@ import string
 from .config import DEFAULT_CONFIG, HotkeyConfig
 from .models.analysis import AnalysisResult
 from .models.command import Command
+from .windows_conflicts.checker import WindowsConflictChecker
 
 logger = logging.getLogger(__name__)
 
@@ -43,15 +44,20 @@ def generate_hotkeys(
 ) -> AnalysisResult:
     config = config or DEFAULT_CONFIG
     used = result.used_hotkeys.copy()
+    checker = WindowsConflictChecker()
+
+    for hotkey in used:
+        checker.mark_used(hotkey)
 
     logger.info(f"Генерация клавиш для {len(result.free)} команд")
 
     for cmd in result.free:
-        new_hotkey = _find_best_hotkey(cmd, used, config)
+        new_hotkey = _find_best_hotkey(cmd, used, config, checker)
         if new_hotkey:
             cmd.suggested_hotkey = new_hotkey
             used.add(new_hotkey)
             result.used_hotkeys.add(new_hotkey)
+            checker.mark_used(new_hotkey)
             logger.debug(f"{cmd.name} -> {new_hotkey}")
         else:
             logger.warning(f"Не удалось подобрать клавишу для: {cmd.name}")
@@ -64,24 +70,26 @@ def _find_best_hotkey(
     cmd: Command,
     used: set[str],
     config: HotkeyConfig,
+    checker: WindowsConflictChecker,
 ) -> str | None:
     if config.strategy.use_semantic:
-        semantic_hotkey = _try_semantic(cmd, used, config)
+        semantic_hotkey = _try_semantic(cmd, used, config, checker)
         if semantic_hotkey:
             return semantic_hotkey
 
     if config.strategy.use_category_weight:
-        category_hotkey = _try_category_based(cmd, used, config)
+        category_hotkey = _try_category_based(cmd, used, config, checker)
         if category_hotkey:
             return category_hotkey
 
-    return _next_free(used, config)
+    return _next_free(used, config, checker)
 
 
 def _try_semantic(
     cmd: Command,
     used: set[str],
     config: HotkeyConfig,
+    checker: WindowsConflictChecker,
 ) -> str | None:
     hint = config.semantic_hints.get(cmd.name)
     if not hint:
@@ -95,8 +103,10 @@ def _try_semantic(
         for prefix in config.prefix_combos:
             combo = f"{prefix}+{key}"
             if combo not in used and combo not in config.exclude_keys:
-                logger.debug(f"Семантическое совпадение: {cmd.name} -> {combo}")
-                return combo
+                check = checker.check(combo)
+                if check.is_available:
+                    logger.debug(f"Семантическое совпадение: {cmd.name} -> {combo}")
+                    return combo
 
     return None
 
@@ -150,6 +160,7 @@ def _try_category_based(
     cmd: Command,
     used: set[str],
     config: HotkeyConfig,
+    checker: WindowsConflictChecker,
 ) -> str | None:
     category_keys = {
         "Блоки": ["B", "G", "U"],
@@ -166,19 +177,23 @@ def _try_category_based(
         for prefix in config.prefix_combos:
             combo = f"{prefix}+{key}"
             if combo not in used and combo not in config.exclude_keys:
-                return combo
+                check = checker.check(combo)
+                if check.is_available:
+                    return combo
 
     return None
 
 
-def _next_free(used: set[str], config: HotkeyConfig) -> str | None:
+def _next_free(used: set[str], config: HotkeyConfig, checker: WindowsConflictChecker) -> str | None:
     letters = list(string.ascii_uppercase)
 
     for prefix in config.prefix_combos:
         for letter in letters:
             combo = f"{prefix}+{letter}"
             if combo not in used and combo not in config.exclude_keys:
-                return combo
+                check = checker.check(combo)
+                if check.is_available:
+                    return combo
 
     extra_prefixes = ["Ctrl+Shift", "Alt+Shift"]
     for prefix in extra_prefixes:
@@ -186,6 +201,8 @@ def _next_free(used: set[str], config: HotkeyConfig) -> str | None:
             for letter in letters:
                 combo = f"{prefix}+{letter}"
                 if combo not in used and combo not in config.exclude_keys:
-                    return combo
+                    check = checker.check(combo)
+                    if check.is_available:
+                        return combo
 
     return None

@@ -506,16 +506,17 @@ class HotkeyManagerApp:
         self._stats_label.config(text=f"Категорий: {len(self._categories)} | Команд: {total_commands}")
 
     def _check_conflicts(self):
-        if not self.result:
-            messagebox.showwarning("Внимание", "Сначала сгенерируйте данные")
+        if not self._categories:
+            messagebox.showwarning("Внимание", "Нет данных для проверки")
             return
 
         conflicts = []
-        for cmd in self.result.commands:
-            if cmd.suggested_hotkey:
-                check = self.checker.check(cmd.suggested_hotkey)
-                if not check.is_available:
-                    conflicts.append(f"{cmd.name}: {cmd.suggested_hotkey} — {check.reason}")
+        for block in self._categories:
+            for cmd in block.commands:
+                if cmd.hotkey:
+                    check = self.checker.check(cmd.hotkey)
+                    if not check.is_available:
+                        conflicts.append(f"[{block.name}] {cmd.name}: {cmd.hotkey} — {check.reason}")
 
         if conflicts:
             msg = "Найдены конфликты:\n\n" + "\n".join(conflicts[:20])
