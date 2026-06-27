@@ -130,9 +130,80 @@ class HotkeyManagerApp:
         if col_id == "category":
             self._add_category_from_file()
         elif col_id == "commands":
-            self._add_commands_from_file()
+            self._select_category_then_import()
         elif col_id == "hotkeys":
             self._status_label.config(text="Клавиши назначаются автоматически при генерации")
+
+    def _select_category_then_import(self):
+        if not self._categories:
+            messagebox.showinfo("Информация", "Сначала добавьте категории через заголовок 'Категория'")
+            return
+
+        select_window = tk.Toplevel(self.root)
+        select_window.title("Выберите категорию")
+        select_window.geometry("350x280")
+        select_window.transient(self.root)
+        select_window.grab_set()
+
+        ttk.Label(select_window, text="Выберите категорию для добавления команд:", padding=10).pack()
+
+        listbox = tk.Listbox(select_window, font=("Arial", 11))
+        listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+
+        for cat in self._categories:
+            listbox.insert(tk.END, f"{cat.name} ({len(cat.commands)} команд)")
+
+        listbox.selection_set(0)
+
+        def on_select():
+            selection = listbox.curselection()
+            if not selection:
+                return
+            idx = selection[0]
+            cat_name = self._categories[idx].name
+            select_window.destroy()
+            self._open_file_for_category(cat_name)
+
+        btn_frame = ttk.Frame(select_window, padding=10)
+        btn_frame.pack()
+        ttk.Button(btn_frame, text="Выбрать", command=on_select).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="Отмена", command=select_window.destroy).pack(side=tk.LEFT, padx=5)
+
+    def _open_file_for_category(self, category_name: str):
+        path = filedialog.askopenfilename(
+            title=f"Выберите файл для категории: {category_name}",
+            filetypes=[
+                ("Все поддерживаемые", "*.pdf *.jpg *.jpeg *.png *.bmp *.tiff"),
+                ("PDF files", "*.pdf"),
+                ("Image files", "*.jpg *.jpeg *.png *.bmp *.tiff"),
+            ],
+        )
+        if not path:
+            return
+
+        try:
+            raw_commands = self._parse_file(path)
+
+            for block in self._categories:
+                if block.name == category_name:
+                    existing_names = {c.name for c in block.commands}
+                    added = 0
+                    for cmd in raw_commands:
+                        if cmd.name not in existing_names:
+                            block.commands.append(cmd)
+                            existing_names.add(cmd.name)
+                            added += 1
+
+                    block.collapsed = False
+
+                    self._generated = False
+                    self._btn_generate.config(state=tk.NORMAL)
+                    self._btn_save.config(state=tk.DISABLED)
+                    self._rebuild_table()
+                    self._status_label.config(text=f"В '{category_name}' добавлено {added} команд")
+                    break
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Ошибка импорта:\n{e}")
 
     def _add_category_from_file(self):
         path = filedialog.askopenfilename(
